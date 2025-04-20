@@ -4,17 +4,36 @@ using UnityEngine;
 
 namespace Infuse
 {
-    public class InfuseContext : IInfuseCompletionHandler
+    public class InfuseContext
     {
+        // Wraps OnInfuseCompleted callback inside InfuseContext so that it's
+        // not exposed as a public member.
+        private class InfuseContextCompletionHandler : IInfuseCompletionHandler
+        {
+            private InfuseContext _context;
+            
+            public InfuseContextCompletionHandler(InfuseContext context)
+            {
+                _context = context;
+            }
+            
+            public void OnInfuseCompleted(InfuseType infuseType, object instance)
+            {
+                _context.OnInfuseCompleted(infuseType, instance);
+            }
+        }
+
         private InfuseTypeMap _typeMap;
         private InfuseServiceMap _serviceMap;
         private InfuseInstanceMap _instanceMap;
-
+        private InfuseContextCompletionHandler _completionHandler;
+        
         public InfuseContext()
         {
             _typeMap = new();
             _serviceMap = new();
             _instanceMap = new();
+            _completionHandler = new(this);
         }
         
         public void InfuseMonoBehaviour(MonoBehaviour instance)
@@ -110,10 +129,10 @@ namespace Infuse
 
         private void OnResolved(InfuseType infuseType, object instance)
         {
-            infuseType.Infuse(instance, _serviceMap, this);
+            infuseType.Infuse(instance, _serviceMap, _completionHandler);
         }
 
-        public void OnInfuseCompleted(InfuseType infuseType, object instance)
+        private void OnInfuseCompleted(InfuseType infuseType, object instance)
         {
             foreach (var serviceType in infuseType.ProvidedServices)
             {
