@@ -7,12 +7,12 @@ namespace Infuse
     public class InfuseTypeMap
     {
         private Dictionary<Type, InfuseType> _typeMap;
-        private Dictionary<Type, List<InfuseType>> _byRequires;
+        private Dictionary<Type, List<InfuseType>> _requiresServiceMap;
 
         public InfuseTypeMap()
         {
             _typeMap = new Dictionary<Type, InfuseType>();
-            _byRequires = new Dictionary<Type, List<InfuseType>>();
+            _requiresServiceMap = new Dictionary<Type, List<InfuseType>>();
         }
         
         public InfuseType GetInfuseType(Type type)
@@ -22,20 +22,18 @@ namespace Infuse
             if (!_typeMap.TryGetValue(type, out infuseType))
             {
                 infuseType = InfuseTypeUtil.CreateInfuseType(type);
-
-                Debug.Log($"InfuseType created for {type}: {infuseType}");
                 
                 _typeMap.Add(type, infuseType);
 
-                foreach (var requiredType in infuseType.RequiredServices)
+                foreach (var requiredService in infuseType.RequiredServices)
                 {
-                    if (_byRequires.TryGetValue(requiredType, out var infuseTypes))
+                    if (_requiresServiceMap.TryGetValue(requiredService, out var infuseTypes))
                     {
                         infuseTypes.Add(infuseType);
                     }
                     else
                     {
-                        _byRequires.Add(requiredType, new List<InfuseType> { infuseType });
+                        _requiresServiceMap.Add(requiredService, new List<InfuseType> { infuseType });
                     }
                 }
             }
@@ -45,14 +43,14 @@ namespace Infuse
 
         public List<InfuseType> GetTypesRequiringService(Type type)
         {
-            if (_byRequires.TryGetValue(type, out var infuseTypes))
+            if (_requiresServiceMap.TryGetValue(type, out var infuseTypes))
             {
                 return infuseTypes;
             }
 
             var list = new List<InfuseType>();
             
-            _byRequires.Add(type, list);
+            _requiresServiceMap.Add(type, list);
             
             return list;
         }

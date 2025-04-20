@@ -117,12 +117,7 @@ namespace Infuse
         {
             foreach (var serviceType in infuseType.ProvidedServices)
             {
-                _serviceMap.Register(serviceType, instance);
-
-                foreach (var requiredType in _typeMap.GetTypesRequiringService(serviceType))
-                {
-                    UpdateResolvedState(requiredType);
-                }
+                RegisterService(serviceType, instance);
             }
         }
         
@@ -140,15 +135,30 @@ namespace Infuse
         {
             foreach (var serviceType in infuseType.ProvidedServices)
             {
-                _serviceMap.Unregister(serviceType, instance);
-
-                foreach (var requiredType in _typeMap.GetTypesRequiringService(serviceType))
-                {
-                    UpdateResolvedState(requiredType);
-                }
+                UnregisterService(serviceType, instance);
             }
 
             infuseType.Defuse(instance);
+        }
+
+        private void RegisterService(Type serviceType, object instance)
+        {
+            _serviceMap.Register(serviceType, instance);
+            
+            foreach (var requiredType in _typeMap.GetTypesRequiringService(serviceType))
+            {
+                UpdateResolvedState(requiredType);
+            }
+        }
+
+        public void UnregisterService(Type serviceType, object instance)
+        {
+            _serviceMap.Unregister(serviceType, instance);
+            
+            foreach (var requiredType in _typeMap.GetTypesRequiringService(serviceType))
+            {
+                UpdateResolvedState(requiredType);
+            }
         }
         
         private bool IsResolved(InfuseType infuseType)
