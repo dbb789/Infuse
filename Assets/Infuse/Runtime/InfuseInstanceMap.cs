@@ -16,7 +16,6 @@ namespace Infuse
 
         public void Add(Type type, object instance)
         {
-            Debug.Log("Adding instance of type " + type);
             GetInstanceSet(type).Add(instance);
         }
         

@@ -8,14 +8,14 @@ namespace Infuse
     {
         private static readonly InfuseContext _context = new();
         
-        public static Awaitable Infuse(MonoBehaviour instance)
+        public static void Infuse(MonoBehaviour instance)
         {
-            return _context.Infuse(instance);
+            _context.Infuse(instance);
         }
 
-        public static Awaitable Infuse(object instance)
+        public static void Infuse(object instance)
         {
-            return _context.Infuse(instance);
+            _context.Infuse(instance);
         }
 
         public static void Defuse(object instance)

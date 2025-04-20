@@ -12,16 +12,14 @@ namespace InfuseExample
 
         private async Awaitable OnInfuse()
         {
-            Debug.Log(">> ExampleServiceB.OnInfuse()");
+            Debug.Log("ExampleServiceB.OnInfuse()", gameObject);
 
             await Awaitable.NextFrameAsync();
-
-            Debug.Log("<< ExampleServiceB.OnInfuse()");
         }
         
         private void OnDefuse()
         {
-            Debug.Log("ExampleServiceB.OnDefuse()");
+            Debug.Log("ExampleServiceB.OnDefuse()", gameObject);
         }
     }
 }

@@ -13,12 +13,12 @@ namespace InfuseExample
 
         private void OnInfuse()
         {
-            Debug.Log("ExampleServiceA.OnInfuse()");
+            Debug.Log("ExampleServiceA.OnInfuse()", gameObject);
         }
         
         private void OnDefuse()
         {
-            Debug.Log("ExampleServiceA.OnDefuse()");
+            Debug.Log("ExampleServiceA.OnDefuse()", gameObject);
         }
     }
 }

@@ -37,10 +37,11 @@ namespace Infuse
             Resolved = (_requires.Count == 0);
         }
         
-        public Awaitable Infuse(object instance,
-                                InfuseServiceMap serviceMap)
+        public void Infuse(object instance,
+                           InfuseServiceMap serviceMap,
+                           IInfuseCompletionHandler completionHandler)
         {
-            return _infuseFunc.Invoke(instance, serviceMap);
+            _infuseFunc.Invoke(instance, serviceMap, this, completionHandler);
         }
 
         public void Defuse(object instance)

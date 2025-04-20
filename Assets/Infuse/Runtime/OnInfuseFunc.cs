@@ -17,11 +17,30 @@ namespace Infuse
             _func = func;
             _dependencies = dependencies ?? new HashSet<Type>();
         }
-        
-        public Awaitable Invoke(object instance,
-                                InfuseServiceMap serviceMap)
+
+        public void Invoke(object instance,
+                           InfuseServiceMap serviceMap,
+                           InfuseType infuseType,
+                           IInfuseCompletionHandler completionHandler)
         {
-            return _func.Invoke(instance, serviceMap);
+            InvokeAsync(instance, serviceMap, infuseType, completionHandler);
+        }
+
+        private async void InvokeAsync(object instance,
+                                       InfuseServiceMap serviceMap,
+                                       InfuseType infuseType,
+                                       IInfuseCompletionHandler completionHandler)
+        {
+            try
+            {
+                await _func?.Invoke(instance, serviceMap);
+                
+                completionHandler.OnInfuseCompleted(infuseType, instance);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Infusion failed for {instance.GetType()}: {e.Message}");
+            }
         }
     }
 }

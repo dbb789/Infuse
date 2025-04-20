@@ -25,12 +25,14 @@ namespace Infuse
                 {
                     foreach (var serviceType in interfaceType.GenericTypeArguments)
                     {
-                        if (!serviceType.IsAssignableFrom(type))
+                        if (serviceType.IsAssignableFrom(type))
                         {
-                            throw new InfuseException($"Type {type} does not derive from {serviceType}");
+                            provides.Add(serviceType);
                         }
-                        
-                        provides.Add(serviceType);
+                        else
+                        {
+                            Debug.LogError($"Infuse: Type {type} does not derive from {serviceType} - ignoring declaration.");
+                        }
                     }
                 }
             }

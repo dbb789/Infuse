@@ -3,7 +3,7 @@ using Infuse;
 
 namespace InfuseExample
 {
-    public class ExampleClientA : MonoBehaviour
+    public class ExampleClient : MonoBehaviour
     {
         private ExampleServiceC _exampleServiceC;
 
@@ -14,12 +14,13 @@ namespace InfuseExample
 
         private void OnInfuse(ExampleServiceC exampleServiceC)
         {
-            Debug.Log("ExampleClientA.OnInfuse()");
+            Debug.Log("ExampleClient.OnInfuse()", gameObject);
             _exampleServiceC = exampleServiceC;
         }
 
         private void OnDefuse()
         {
+            Debug.Log("ExampleClient.OnDefuse()", gameObject);
             _exampleServiceC = null;
         }
     }
