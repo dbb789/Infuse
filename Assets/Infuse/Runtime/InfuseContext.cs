@@ -17,7 +17,7 @@ namespace Infuse
             _instanceMap = new();
         }
         
-        public void Infuse(MonoBehaviour instance)
+        public void InfuseMonoBehaviour(MonoBehaviour instance)
         {
             if (instance == null)
             {
@@ -26,7 +26,7 @@ namespace Infuse
             
             instance.destroyCancellationToken.Register(() => Defuse(instance));
 
-            Infuse((object)instance);
+            Infuse(instance);
         }
         
         public void Infuse(object instance)

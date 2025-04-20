@@ -18,21 +18,6 @@ namespace Infuse
             public bool MoveNext() => _enumerator.MoveNext();
             public void Dispose() => _enumerator.Dispose();
         }
-
-        public object First
-        {
-            get
-            {
-                using var enumerator = _instanceSet.GetEnumerator();
-                
-                if (enumerator.MoveNext())
-                {
-                    return enumerator.Current;
-                }
-
-                throw new InvalidOperationException("No instances in set.");
-            }
-        }
         
         public int Count => _instanceSet.Count;
         

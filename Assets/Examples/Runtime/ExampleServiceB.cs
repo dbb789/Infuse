@@ -7,7 +7,7 @@ namespace InfuseExample
     {
         private void Awake()
         {
-            InfuseManager.Infuse(this);
+            InfuseManager.InfuseMonoBehaviour(this);
         }
 
         private async Awaitable OnInfuse()

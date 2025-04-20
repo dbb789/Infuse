@@ -6,9 +6,14 @@ namespace InfuseExample
 {
     public class ExampleServiceA : MonoBehaviour, InfuseService<ExampleServiceA>
     {
-        private void Awake()
+        private void OnEnable()
         {
             InfuseManager.Infuse(this);
+        }
+
+        private void OnDisable()
+        {
+            InfuseManager.Defuse(this);
         }
 
         private void OnInfuse()

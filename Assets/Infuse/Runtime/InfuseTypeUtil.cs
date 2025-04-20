@@ -38,16 +38,10 @@ namespace Infuse
             }
 
             var methods = new List<MethodInfo>();
-            var baseType = type;
-
-            while (baseType != null && baseType != typeof(object))
-            {
-                methods.AddRange(baseType.GetMethods(BindingFlags.Public |
-                                                     BindingFlags.NonPublic |
-                                                     BindingFlags.Instance));
-                
-                baseType = baseType.BaseType;
-            }
+            
+            methods.AddRange(type.GetMethods(BindingFlags.Public |
+                                             BindingFlags.NonPublic |
+                                             BindingFlags.Instance));
 
             var infuseMethods = new List<MethodInfo>();
             var defuseMethods = new List<MethodInfo>();
@@ -73,7 +67,6 @@ namespace Infuse
                                   CreateOnInfuseFunc(infuseMethods),
                                   CreateOnDefuseFunc(defuseMethods));
         }
-
 
         private static OnInfuseFunc CreateOnInfuseFunc(List<MethodInfo> methods)
         {

@@ -5,14 +5,16 @@ namespace InfuseExample
 {
     public class ExampleServiceC : ExampleServiceCBase, InfuseService<ExampleServiceC>
     {
-        private void OnInfuse(ExampleServiceB exampleServiceB)
+        protected void OnInfuse(ExampleServiceB exampleServiceB)
         {
             Debug.Log("ExampleServiceC.OnInfuse()");
         }
         
-        private void OnDefuse()
+        protected override void OnDefuse()
         {
             Debug.Log("ExampleServiceC.OnDefuse()");
+            
+            base.OnDefuse();
         }
     }
 }

@@ -7,15 +7,15 @@ namespace InfuseExample
     {
         private void Awake()
         {
-            InfuseManager.Infuse(this);
+            InfuseManager.InfuseMonoBehaviour(this);
         }
 
-        private void OnInfuse(ExampleServiceA exampleServiceA)
+        protected void OnInfuse(ExampleServiceA exampleServiceA)
         {
             Debug.Log("ExampleServiceCBase.OnInfuse()");
         }
         
-        private void OnDefuse()
+        protected virtual void OnDefuse()
         {
             Debug.Log("ExampleServiceCBase.OnDefuse()");
         }
