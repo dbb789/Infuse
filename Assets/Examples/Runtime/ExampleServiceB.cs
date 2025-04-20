@@ -3,7 +3,7 @@ using Infuse;
 
 namespace InfuseExample
 {
-    public class ExampleServiceB : MonoBehaviour, InfuseProvides<ExampleServiceB>
+    public class ExampleServiceB : MonoBehaviour, InfuseService<ExampleServiceB>
     {
         private void Awake()
         {

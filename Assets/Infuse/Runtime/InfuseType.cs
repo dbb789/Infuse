@@ -33,13 +33,14 @@ namespace Infuse
             _provides = new HashSet<Type>(provides ?? Array.Empty<Type>());
             _requires = new HashSet<Type>(_infuseFunc.Dependencies);
 
+            // Any type with no dependencies is always resolved by definition.
             Resolved = (_requires.Count == 0);
         }
         
         public Awaitable Infuse(object instance,
-                                InfuseInstanceMap instanceMap)
+                                InfuseServiceMap serviceMap)
         {
-            return _infuseFunc.Invoke(instance, instanceMap);
+            return _infuseFunc.Invoke(instance, serviceMap);
         }
 
         public void Defuse(object instance)

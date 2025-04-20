@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace Infuse
 {
@@ -13,40 +14,24 @@ namespace Infuse
             _instanceMap = new Dictionary<Type, InfuseInstanceSet>();
         }
 
-        public bool Add(Type type, object instance)
+        public void Add(Type type, object instance)
         {
-            var instanceSet = GetInstanceSet(type);
-            
-            if (instanceSet.Add(instance))
-            {
-                return (instanceSet.Count == 1);
-            }
-
-            return false;
+            Debug.Log("Adding instance of type " + type);
+            GetInstanceSet(type).Add(instance);
         }
         
-        public bool Remove(Type type, object instance)
+        public void Remove(Type type, object instance)
         {
-            var instanceSet = GetInstanceSet(type);
-            
-            if (instanceSet.Remove(instance))
-            {
-                return (instanceSet.Count == 0);
-            }
-
-            return false;
+            GetInstanceSet(type).Remove(instance);
         }
 
-        public bool TryGetInstance(Type type, out object instance)
+        public bool Contains(Type type, object instance)
         {
-            if (_instanceMap.TryGetValue(type, out var instances) && instances.Count > 0)
+            if (_instanceMap.TryGetValue(type, out var instances))
             {
-                instance = instances.First;
-                return true;
+                return instances.Contains(instance);
             }
 
-            instance = default;
-            
             return false;
         }
         

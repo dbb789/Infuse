@@ -8,10 +8,10 @@ namespace Infuse
     {
         public HashSet<Type> Dependencies => _dependencies;
 
-        private Func<object, InfuseInstanceMap, Awaitable> _func;
+        private Func<object, InfuseServiceMap, Awaitable> _func;
         private HashSet<Type> _dependencies;
 
-        public OnInfuseFunc(Func<object, InfuseInstanceMap, Awaitable> func,
+        public OnInfuseFunc(Func<object, InfuseServiceMap, Awaitable> func,
                             HashSet<Type> dependencies)
         {
             _func = func;
@@ -19,9 +19,9 @@ namespace Infuse
         }
         
         public Awaitable Invoke(object instance,
-                                InfuseInstanceMap instanceMap)
+                                InfuseServiceMap serviceMap)
         {
-            return _func.Invoke(instance, instanceMap);
+            return _func.Invoke(instance, serviceMap);
         }
     }
 }

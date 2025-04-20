@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Infuse
 {
-    public static class InfuseUtil
+    public static class InfuseTypeUtil
     {
         public static InfuseType CreateInfuseType(Type type)
         {
@@ -21,16 +21,16 @@ namespace Infuse
             foreach (var interfaceType in interfaces)
             {
                 if (interfaceType.IsGenericType &&
-                    interfaceType.GetGenericTypeDefinition() == typeof(InfuseProvides<>))
+                    interfaceType.GetGenericTypeDefinition() == typeof(InfuseService<>))
                 {
-                    foreach (var providesType in interfaceType.GenericTypeArguments)
+                    foreach (var serviceType in interfaceType.GenericTypeArguments)
                     {
-                        if (!providesType.IsAssignableFrom(type))
+                        if (!serviceType.IsAssignableFrom(type))
                         {
-                            throw new InfuseException($"Type {type} does not derive from {providesType}");
+                            throw new InfuseException($"Type {type} does not derive from {serviceType}");
                         }
                         
-                        provides.Add(providesType);
+                        provides.Add(serviceType);
                     }
                 }
             }
@@ -63,7 +63,7 @@ namespace Infuse
 
         private static OnInfuseFunc CreateOnInfuseFunc(List<MethodInfo> methods)
         {
-            Func<object, InfuseInstanceMap, Awaitable> func = null;
+            Func<object, InfuseServiceMap, Awaitable> func = null;
             var dependencies = new HashSet<Type>();
             
             foreach (var method in methods)
@@ -96,7 +96,7 @@ namespace Infuse
                         parameterTypeArray[parameter.Position] = parameter.ParameterType;
                     }
 
-                    Func<object, InfuseInstanceMap, Awaitable> invoker = (instance, instanceMap) =>
+                    Func<object, InfuseServiceMap, Awaitable> invoker = (instance, serviceMap) =>
                     {
                         var parameters = new object[parameterTypeArray.Length];
 
@@ -104,7 +104,7 @@ namespace Infuse
                         {
                             var parameterType = parameterTypeArray[i];
 
-                            if (instanceMap.TryGetInstance(parameterType, out var value))
+                            if (serviceMap.TryGetService(parameterType, out var value))
                             {
                                 parameters[i] = value;
                             }
@@ -116,15 +116,15 @@ namespace Infuse
 
                         method.Invoke(instance, parameters);
 
-                        return CompletedAwaitable.Instance;
+                        return Awaitable.NextFrameAsync();
                     };
 
                     if (func != null)
                     {
-                        func = async (instance, instanceMap) =>
+                        func = async (instance, serviceMap) =>
                         {
-                            await func(instance, instanceMap);
-                            await invoker(instance, instanceMap);
+                            await func(instance, serviceMap);
+                            await invoker(instance, serviceMap);
                         };
                     }
                     else
@@ -155,7 +155,7 @@ namespace Infuse
                         parameterTypeArray[parameter.Position] = parameter.ParameterType;
                     }
 
-                    Func<object, InfuseInstanceMap, Awaitable> invoker = (instance, instanceMap) =>
+                    Func<object, InfuseServiceMap, Awaitable> invoker = (instance, serviceMap) =>
                     {
                         var parameters = new object[parameterTypeArray.Length];
 
@@ -163,7 +163,7 @@ namespace Infuse
                         {
                             var parameterType = parameterTypeArray[i];
 
-                            if (instanceMap.TryGetInstance(parameterType, out var value))
+                            if (serviceMap.TryGetService(parameterType, out var value))
                             {
                                 parameters[i] = value;
                             }
@@ -178,10 +178,10 @@ namespace Infuse
 
                     if (func != null)
                     {
-                        func = async (instance, instanceMap) =>
+                        func = async (instance, serviceMap) =>
                         {
-                            await func(instance, instanceMap);
-                            await invoker(instance, instanceMap);
+                            await func(instance, serviceMap);
+                            await invoker(instance, serviceMap);
                         };
                     }
                     else
@@ -236,18 +236,6 @@ namespace Infuse
             }
 
             return new OnDefuseFunc(func);
-        }
-
-        private static class CompletedAwaitable
-        {
-            private static readonly AwaitableCompletionSource _completionSource = new();
-
-            static CompletedAwaitable()
-            {
-                _completionSource.SetResult();
-            }
-
-            public static Awaitable Instance => _completionSource.Awaitable;
         }
     }
 }

@@ -1,6 +1,6 @@
 namespace Infuse
 {
-    public interface InfuseProvides<T>
+    public interface InfuseService<T>
     {
         // ...
     }

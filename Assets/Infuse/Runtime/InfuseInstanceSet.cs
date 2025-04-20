@@ -52,6 +52,11 @@ namespace Infuse
         {
             return _instanceSet.Remove(instance);
         }
+
+        public bool Contains(object instance)
+        {
+            return _instanceSet.Contains(instance);
+        }
         
         public Enumerator GetEnumerator()
         {

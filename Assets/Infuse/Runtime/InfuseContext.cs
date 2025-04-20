@@ -7,39 +7,67 @@ namespace Infuse
     public class InfuseContext
     {
         private InfuseTypeMap _typeMap;
+        private InfuseServiceMap _serviceMap;
         private InfuseInstanceMap _instanceMap;
-        
+
         public InfuseContext()
         {
             _typeMap = new();
+            _serviceMap = new();
             _instanceMap = new();
         }
+        
+        public Awaitable Infuse(MonoBehaviour instance)
+        {
+            if (instance == null)
+            {
+                throw new ArgumentNullException(nameof(instance));
+            }
+            
+            instance.destroyCancellationToken.Register(() => Defuse(instance));
 
+            return Infuse((object)instance);
+        }
+        
         public async Awaitable Infuse(object instance)
         {
             if (instance == null)
             {
                 throw new ArgumentNullException(nameof(instance));
             }
-
-            var type = instance.GetType();
-            var infuseType = _typeMap.GetInfuseType(type);
-
-            if (infuseType.Resolved)
+            
+            try
             {
-                await infuseType.Infuse(instance, _instanceMap);
-                
-                if (_instanceMap.Add(type, instance))
+                var type = instance.GetType();
+
+                if (_instanceMap.Contains(type, instance))
                 {
-                    foreach (var requiredType in _typeMap.GetRequiresInfuseType(type))
+                    Debug.LogWarning($"Instance of type {type} is already infused.");
+                    return;
+                }
+
+                _instanceMap.Add(type, instance);
+                
+                var infuseType = _typeMap.GetInfuseType(type);
+                
+                if (infuseType.Resolved)
+                {
+                    await infuseType.Infuse(instance, _serviceMap);
+
+                    foreach (var serviceType in infuseType.Provides)
                     {
-                        await UpdateResolvedState(requiredType);
+                        _serviceMap.Register(serviceType, instance);
+
+                        foreach (var requiredType in _typeMap.GetRequiresInfuseType(serviceType))
+                        {
+                            await UpdateResolvedState(requiredType);
+                        }
                     }
                 }
             }
-            else
+            catch (Exception e)
             {
-                _instanceMap.Add(type, instance);
+                Debug.LogError($"Infuse failed for {instance.GetType()}: {e}");
             }
         }
         
@@ -51,30 +79,39 @@ namespace Infuse
             }
 
             var type = instance.GetType();
+            
+            if (!_instanceMap.Contains(type, instance))
+            {
+                Debug.LogWarning($"Instance of type {type} is not infused.");
+                return;
+            }
+
             var infuseType = _typeMap.GetInfuseType(type);
             
             if (infuseType.Resolved)
             {
-                infuseType.Defuse(instance);
-                
-                if (_instanceMap.Remove(type, instance))
+                foreach (var serviceType in infuseType.Provides)
                 {
-                    foreach (var requiredType in _typeMap.GetRequiresInfuseType(type))
+                    _serviceMap.Unregister(serviceType, instance);
+
+                    foreach (var requiredType in _typeMap.GetRequiresInfuseType(serviceType))
                     {
                         UpdateResolvedState(requiredType);
                     }
                 }
+                
+                infuseType.Defuse(instance);
             }
-            else
-            {
-                _instanceMap.Remove(type, instance);
-            }
+
+            _instanceMap.Remove(type, instance);
         }
         
         private async Awaitable UpdateResolvedState(InfuseType infuseType)
         {
             bool nextResolved = IsResolved(infuseType);
 
+            Debug.Log($"UpdateResolvedState: {infuseType.Type} -> {nextResolved}");
+            
             if (infuseType.Resolved != nextResolved)
             {
                 infuseType.Resolved = nextResolved;
@@ -99,9 +136,16 @@ namespace Infuse
         {
             var instanceSet = _instanceMap.GetInstanceSet(infuseType.Type);
 
+            Debug.Log($"OnResolved: {infuseType.Type} -> {instanceSet.Count} instances");
+            
             foreach (var instance in instanceSet)
             {
-                await infuseType.Infuse(instance, _instanceMap);
+                await infuseType.Infuse(instance, _serviceMap);
+
+                foreach (var serviceType in infuseType.Provides)
+                {
+                    _serviceMap.Register(serviceType, instance);
+                }
             }
         }
         
@@ -111,6 +155,11 @@ namespace Infuse
 
             foreach (var instance in instanceSet)
             {
+                foreach (var serviceType in infuseType.Provides)
+                {
+                    _serviceMap.Unregister(serviceType, instance);
+                }
+
                 infuseType.Defuse(instance);
             }
         }
@@ -119,19 +168,7 @@ namespace Infuse
         {
             foreach (var requiredType in infuseType.Requires)
             {
-                bool hasProvider = false;
-                var providesList = _typeMap.GetProvidesInfuseType(requiredType);
-
-                foreach (var providesType in providesList)
-                {
-                    if (providesType.Resolved && _instanceMap.GetInstanceSet(providesType.Type).Count > 0)
-                    {
-                        hasProvider = true;
-                        break;
-                    }
-                }
-
-                if (!hasProvider)
+                if (!_serviceMap.Contains(requiredType))
                 {
                     return false;
                 }

@@ -6,17 +6,21 @@ namespace Infuse
 {
     public static class InfuseManager
     {
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
-        private static void Initialize()
+        private static readonly InfuseContext _context = new();
+        
+        public static Awaitable Infuse(MonoBehaviour instance)
         {
-            _context = new InfuseContext();
+            return _context.Infuse(instance);
         }
-
-        private static InfuseContext _context;
 
         public static Awaitable Infuse(object instance)
         {
             return _context.Infuse(instance);
+        }
+
+        public static void Defuse(object instance)
+        {
+            _context.Defuse(instance);
         }
     }
 }

@@ -23,7 +23,7 @@ namespace Infuse
             
             if (!_typeMap.TryGetValue(type, out infuseType))
             {
-                infuseType = InfuseUtil.CreateInfuseType(type);
+                infuseType = InfuseTypeUtil.CreateInfuseType(type);
 
                 Debug.Log($"InfuseType created for {type}: {infuseType}");
                 
