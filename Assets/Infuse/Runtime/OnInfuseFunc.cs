@@ -8,10 +8,10 @@ namespace Infuse
     {
         public HashSet<Type> Dependencies => _dependencies;
 
-        private Func<object, InfuseServiceMap, Awaitable> _func;
+        private Action<object, InfuseServiceMap, InfuseType, IInfuseCompletionHandler> _func;
         private HashSet<Type> _dependencies;
 
-        public OnInfuseFunc(Func<object, InfuseServiceMap, Awaitable> func,
+        public OnInfuseFunc(Action<object, InfuseServiceMap, InfuseType, IInfuseCompletionHandler> func,
                             HashSet<Type> dependencies)
         {
             _func = func;
@@ -23,23 +23,13 @@ namespace Infuse
                            InfuseType infuseType,
                            IInfuseCompletionHandler completionHandler)
         {
-            InvokeAsync(instance, serviceMap, infuseType, completionHandler);
-        }
-
-        private async void InvokeAsync(object instance,
-                                       InfuseServiceMap serviceMap,
-                                       InfuseType infuseType,
-                                       IInfuseCompletionHandler completionHandler)
-        {
-            try
+            if (_func != null)
             {
-                await _func?.Invoke(instance, serviceMap);
-                
-                completionHandler.OnInfuseCompleted(infuseType, instance);
+                _func.Invoke(instance, serviceMap, infuseType, completionHandler);
             }
-            catch (Exception e)
+            else
             {
-                Debug.LogError($"Infusion failed for {instance.GetType()}: {e.Message}");
+                completionHandler.OnInfuseCompleted(infuseType, instance);
             }
         }
     }

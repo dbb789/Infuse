@@ -36,26 +36,38 @@ namespace Infuse
                     }
                 }
             }
-            
-            var methods = type.GetMethods(BindingFlags.Public |
-                                          BindingFlags.NonPublic |
-                                          BindingFlags.Instance);
+
+            var methods = new List<MethodInfo>();
+            var baseType = type;
+
+            while (baseType != null && baseType != typeof(object))
+            {
+                methods.AddRange(baseType.GetMethods(BindingFlags.Public |
+                                                     BindingFlags.NonPublic |
+                                                     BindingFlags.Instance));
+                
+                baseType = baseType.BaseType;
+            }
 
             var infuseMethods = new List<MethodInfo>();
             var defuseMethods = new List<MethodInfo>();
 
-            foreach (var method in methods)
+            foreach (var method in Enumerable.Reverse(methods))
             {
                 if (method.Name == "OnInfuse")
                 {
                     infuseMethods.Add(method);
                 }
-                else if (method.Name == "OnDefuse")
+            }
+
+            foreach (var method in methods)
+            {
+                if (method.Name == "OnDefuse")
                 {
                     defuseMethods.Add(method);
                 }
             }
-
+            
             return new InfuseType(type,
                                   provides.AsEnumerable<Type>(),
                                   CreateOnInfuseFunc(infuseMethods),
@@ -123,9 +135,11 @@ namespace Infuse
 
                     if (func != null)
                     {
+                        var prevFunc = func;
+
                         func = async (instance, serviceMap) =>
                         {
-                            await func(instance, serviceMap);
+                            await prevFunc(instance, serviceMap);
                             await invoker(instance, serviceMap);
                         };
                     }
@@ -180,9 +194,11 @@ namespace Infuse
 
                     if (func != null)
                     {
+                        var prevFunc = func;
+                        
                         func = async (instance, serviceMap) =>
                         {
-                            await func(instance, serviceMap);
+                            await prevFunc(instance, serviceMap);
                             await invoker(instance, serviceMap);
                         };
                     }
@@ -197,7 +213,29 @@ namespace Infuse
                 }
             }
 
-            return new OnInfuseFunc(func, dependencies);
+            return new OnInfuseFunc(BindAsync(func), dependencies);
+        }
+
+        private static Action<object, InfuseServiceMap, InfuseType, IInfuseCompletionHandler> BindAsync(
+            Func<object, InfuseServiceMap, Awaitable> func)
+        {
+            if (func == null)
+            {
+                return null;
+            }
+            
+            return async (instance, serviceMap, infuseType, completionHandler) =>
+            {
+                try
+                {
+                    await func(instance, serviceMap);
+                    completionHandler.OnInfuseCompleted(infuseType, instance);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"Infuse: Exception in OnInfuse: {e}");
+                }
+            };
         }
 
         private static OnDefuseFunc CreateOnDefuseFunc(List<MethodInfo> methods)

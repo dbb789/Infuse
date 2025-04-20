@@ -3,14 +3,9 @@ using Infuse;
 
 namespace InfuseExample
 {
-    public class ExampleServiceC : MonoBehaviour, InfuseService<ExampleServiceC>
+    public class ExampleServiceC : ExampleServiceCBase, InfuseService<ExampleServiceC>
     {
-        private void Awake()
-        {
-            InfuseManager.Infuse(this);
-        }
-
-        private void OnInfuse(ExampleServiceA exampleServiceA, ExampleServiceB exampleServiceB)
+        private void OnInfuse(ExampleServiceB exampleServiceB)
         {
             Debug.Log("ExampleServiceC.OnInfuse()");
         }
