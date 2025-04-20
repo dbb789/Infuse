@@ -115,11 +115,11 @@ namespace Infuse
 
         public void OnInfuseCompleted(InfuseType infuseType, object instance)
         {
-            foreach (var serviceType in infuseType.Provides)
+            foreach (var serviceType in infuseType.ProvidedServices)
             {
                 _serviceMap.Register(serviceType, instance);
 
-                foreach (var requiredType in _typeMap.GetRequiresInfuseType(serviceType))
+                foreach (var requiredType in _typeMap.GetTypesRequiringService(serviceType))
                 {
                     UpdateResolvedState(requiredType);
                 }
@@ -138,11 +138,11 @@ namespace Infuse
 
         private void OnUnresolved(InfuseType infuseType, object instance)
         {
-            foreach (var serviceType in infuseType.Provides)
+            foreach (var serviceType in infuseType.ProvidedServices)
             {
                 _serviceMap.Unregister(serviceType, instance);
 
-                foreach (var requiredType in _typeMap.GetRequiresInfuseType(serviceType))
+                foreach (var requiredType in _typeMap.GetTypesRequiringService(serviceType))
                 {
                     UpdateResolvedState(requiredType);
                 }
@@ -153,9 +153,9 @@ namespace Infuse
         
         private bool IsResolved(InfuseType infuseType)
         {
-            foreach (var requiredType in infuseType.Requires)
+            foreach (var serviceType in infuseType.RequiredServices)
             {
-                if (!_serviceMap.Contains(requiredType))
+                if (!_serviceMap.Contains(serviceType))
                 {
                     return false;
                 }

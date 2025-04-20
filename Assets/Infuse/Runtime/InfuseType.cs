@@ -9,19 +9,19 @@ namespace Infuse
         public Type Type => _type;
         public bool Resolved { get; set; }
         
-        public HashSet<Type> Provides => _provides;
-        public HashSet<Type> Requires => _requires;
+        public HashSet<Type> ProvidedServices => _providedServices;
+        public HashSet<Type> RequiredServices => _requiredServices;
 
         private Type _type;
         
-        private HashSet<Type> _provides;
-        private HashSet<Type> _requires;
+        private HashSet<Type> _providedServices;
+        private HashSet<Type> _requiredServices;
         
         private OnInfuseFunc _infuseFunc;
         private OnDefuseFunc _defuseFunc;
         
         public InfuseType(Type type,
-                          IEnumerable<Type> provides,
+                          IEnumerable<Type> providedServices,
                           OnInfuseFunc infuseFunc,
                           OnDefuseFunc defuseFunc)
         {
@@ -30,11 +30,11 @@ namespace Infuse
             _infuseFunc = infuseFunc ?? throw new ArgumentNullException(nameof(infuseFunc));
             _defuseFunc = defuseFunc ?? throw new ArgumentNullException(nameof(defuseFunc));
             
-            _provides = new HashSet<Type>(provides ?? Array.Empty<Type>());
-            _requires = new HashSet<Type>(_infuseFunc.Dependencies);
+            _providedServices = new HashSet<Type>(providedServices ?? Array.Empty<Type>());
+            _requiredServices = new HashSet<Type>(_infuseFunc.Dependencies);
 
             // Any type with no dependencies is always resolved by definition.
-            Resolved = (_requires.Count == 0);
+            Resolved = (_requiredServices.Count == 0);
         }
         
         public void Infuse(object instance,
@@ -51,7 +51,7 @@ namespace Infuse
 
         public override string ToString()
         {
-            return $"Provides: {string.Join(", ", _provides)} / Requires: {string.Join(", ", _requires)}";
+            return $"ProvidedServices: {string.Join(", ", _providedServices)} / RequiredServices: {string.Join(", ", _requiredServices)}";
         }
     }
 }

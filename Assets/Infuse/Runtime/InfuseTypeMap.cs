@@ -8,13 +8,11 @@ namespace Infuse
     {
         private Dictionary<Type, InfuseType> _typeMap;
         private Dictionary<Type, List<InfuseType>> _byRequires;
-        private Dictionary<Type, List<InfuseType>> _byProvides;
 
         public InfuseTypeMap()
         {
             _typeMap = new Dictionary<Type, InfuseType>();
             _byRequires = new Dictionary<Type, List<InfuseType>>();
-            _byProvides = new Dictionary<Type, List<InfuseType>>();
         }
         
         public InfuseType GetInfuseType(Type type)
@@ -29,7 +27,7 @@ namespace Infuse
                 
                 _typeMap.Add(type, infuseType);
 
-                foreach (var requiredType in infuseType.Requires)
+                foreach (var requiredType in infuseType.RequiredServices)
                 {
                     if (_byRequires.TryGetValue(requiredType, out var infuseTypes))
                     {
@@ -40,45 +38,23 @@ namespace Infuse
                         _byRequires.Add(requiredType, new List<InfuseType> { infuseType });
                     }
                 }
-
-                foreach (var providedType in infuseType.Provides)
-                {
-                    if (_byProvides.TryGetValue(providedType, out var infuseTypes))
-                    {
-                        infuseTypes.Add(infuseType);
-                    }
-                    else
-                    {
-                        _byProvides.Add(providedType, new List<InfuseType> { infuseType });
-                    }
-                }
             }
 
             return infuseType;
         }
 
-        public List<InfuseType> GetRequiresInfuseType(Type type)
+        public List<InfuseType> GetTypesRequiringService(Type type)
         {
             if (_byRequires.TryGetValue(type, out var infuseTypes))
             {
                 return infuseTypes;
             }
-            else
-            {
-                return new List<InfuseType>();
-            }
-        }
 
-        public List<InfuseType> GetProvidesInfuseType(Type type)
-        {
-            if (_byProvides.TryGetValue(type, out var infuseTypes))
-            {
-                return infuseTypes;
-            }
-            else
-            {
-                return new List<InfuseType>();
-            }
+            var list = new List<InfuseType>();
+            
+            _byRequires.Add(type, list);
+            
+            return list;
         }
     }
 }
