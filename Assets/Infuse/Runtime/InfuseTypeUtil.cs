@@ -77,165 +77,27 @@ namespace Infuse
 
         private static OnInfuseFunc CreateOnInfuseFunc(List<MethodInfo> methods)
         {
-            Func<object, InfuseServiceMap, Awaitable> func = null;
-            var dependencies = new HashSet<Type>();
+            bool hasAsync = false;
+
+            foreach (var method in methods)
+            {
+                if (method.ReturnType == typeof(Awaitable))
+                {
+                    hasAsync = true;
+                    break;
+                }
+            }
+            
+            IOnInfuseFuncBuilder builder = hasAsync ?
+                new AsyncOnInfuseFuncBuilder() :
+                new SyncOnInfuseFuncBuilder();
             
             foreach (var method in methods)
             {
-                if (method.IsGenericMethod)
-                {
-                    throw new InfuseException($"Generic methods are not supported: {method.Name}");
-                }
-
-                if (method.ReturnType == typeof(void))
-                {
-                    var parameters = method.GetParameters();
-                    var parameterTypeArray = new Type[parameters.Length];
-
-                    for (int i = 0; i < parameters.Length; i++)
-                    {
-                        var parameter = parameters[i];
-
-                        if (parameter.IsIn)
-                        {
-                            throw new InfuseException($"In parameters are not supported: {parameter.Name}");
-                        }
-
-                        if (parameter.IsOut)
-                        {
-                            throw new InfuseException($"Out parameters are not supported: {parameter.Name}");
-                        }
-
-                        dependencies.Add(parameter.ParameterType);
-                        parameterTypeArray[parameter.Position] = parameter.ParameterType;
-                    }
-
-                    Func<object, InfuseServiceMap, Awaitable> invoker = (instance, serviceMap) =>
-                    {
-                        var parameters = new object[parameterTypeArray.Length];
-
-                        for (int i = 0; i < parameterTypeArray.Length; i++)
-                        {
-                            var parameterType = parameterTypeArray[i];
-
-                            if (serviceMap.TryGetService(parameterType, out var value))
-                            {
-                                parameters[i] = value;
-                            }
-                            else
-                            {
-                                throw new InfuseException($"Missing dependency: {parameterType}");
-                            }
-                        }
-
-                        method.Invoke(instance, parameters);
-
-                        return Awaitable.NextFrameAsync();
-                    };
-
-                    if (func != null)
-                    {
-                        var prevFunc = func;
-
-                        func = async (instance, serviceMap) =>
-                        {
-                            await prevFunc(instance, serviceMap);
-                            await invoker(instance, serviceMap);
-                        };
-                    }
-                    else
-                    {
-                        func = invoker;
-                    }
-                }
-                else if (method.ReturnType == typeof(Awaitable))
-                {
-                    var parameters = method.GetParameters();
-                    var parameterTypeArray = new Type[parameters.Length];
-
-                    for (int i = 0; i < parameters.Length; i++)
-                    {
-                        var parameter = parameters[i];
-
-                        if (parameter.IsIn)
-                        {
-                            throw new InfuseException($"In parameters are not supported: {parameter.Name}");
-                        }
-
-                        if (parameter.IsOut)
-                        {
-                            throw new InfuseException($"Out parameters are not supported: {parameter.Name}");
-                        }
-
-                        dependencies.Add(parameter.ParameterType);
-                        parameterTypeArray[parameter.Position] = parameter.ParameterType;
-                    }
-
-                    Func<object, InfuseServiceMap, Awaitable> invoker = (instance, serviceMap) =>
-                    {
-                        var parameters = new object[parameterTypeArray.Length];
-
-                        for (int i = 0; i < parameterTypeArray.Length; i++)
-                        {
-                            var parameterType = parameterTypeArray[i];
-
-                            if (serviceMap.TryGetService(parameterType, out var value))
-                            {
-                                parameters[i] = value;
-                            }
-                            else
-                            {
-                                throw new InfuseException($"Missing dependency: {parameterType}");
-                            }
-                        }
-
-                        return (Awaitable)method.Invoke(instance, parameters);
-                    };
-
-                    if (func != null)
-                    {
-                        var prevFunc = func;
-                        
-                        func = async (instance, serviceMap) =>
-                        {
-                            await prevFunc(instance, serviceMap);
-                            await invoker(instance, serviceMap);
-                        };
-                    }
-                    else
-                    {
-                        func = invoker;
-                    }
-                }
-                else
-                {
-                    throw new InfuseException($"Return type must be void: {method.Name}");
-                }
+                builder.AddMethod(method);
             }
 
-            return new OnInfuseFunc(BindAsync(func), dependencies);
-        }
-
-        private static Action<object, InfuseServiceMap, InfuseType, IInfuseCompletionHandler> BindAsync(
-            Func<object, InfuseServiceMap, Awaitable> func)
-        {
-            if (func == null)
-            {
-                return null;
-            }
-            
-            return async (instance, serviceMap, infuseType, completionHandler) =>
-            {
-                try
-                {
-                    await func(instance, serviceMap);
-                    completionHandler.OnInfuseCompleted(infuseType, instance);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError($"Infuse: Exception in OnInfuse: {e}");
-                }
-            };
+            return builder.Build();
         }
 
         private static OnDefuseFunc CreateOnDefuseFunc(List<MethodInfo> methods)
