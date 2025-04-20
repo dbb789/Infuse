@@ -14,9 +14,9 @@ namespace Infuse
 
         private static InfuseContext _context;
 
-        public static void Infuse(object instance)
+        public static Awaitable Infuse(object instance)
         {
-            _context.Infuse(instance);
+            return _context.Infuse(instance);
         }
     }
 }

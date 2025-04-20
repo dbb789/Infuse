@@ -6,65 +6,67 @@ namespace Infuse
 {
     public class InfuseInstanceMap
     {
-        private Dictionary<Type, List<object>> _instanceMap;
+        private Dictionary<Type, InfuseInstanceSet> _instanceMap;
 
         public InfuseInstanceMap()
         {
-            _instanceMap = new Dictionary<Type, List<object>>();
+            _instanceMap = new Dictionary<Type, InfuseInstanceSet>();
         }
 
-        public int Add(Type type, object instance)
+        public bool Add(Type type, object instance)
         {
-            var list = GetInstanceList(type);
+            var instanceSet = GetInstanceSet(type);
+            
+            if (instanceSet.Add(instance))
+            {
+                return (instanceSet.Count == 1);
+            }
 
-            list.Add(instance);
+            return false;
+        }
+        
+        public bool Remove(Type type, object instance)
+        {
+            var instanceSet = GetInstanceSet(type);
+            
+            if (instanceSet.Remove(instance))
+            {
+                return (instanceSet.Count == 0);
+            }
 
-            return list.Count;
+            return false;
         }
 
         public bool TryGetInstance(Type type, out object instance)
         {
             if (_instanceMap.TryGetValue(type, out var instances) && instances.Count > 0)
             {
-                instance = instances[0];
+                instance = instances.First;
                 return true;
             }
 
             instance = default;
+            
             return false;
         }
         
-        public List<object> GetInstanceList(Type type)
+        public InfuseInstanceSet GetInstanceSet(Type type)
         {
-            List<object> instanceList;
+            InfuseInstanceSet instanceSet;
             
-            if (!_instanceMap.TryGetValue(type, out instanceList))
+            if (!_instanceMap.TryGetValue(type, out instanceSet))
             {
-                instanceList = new List<object>();
-                _instanceMap.Add(type, instanceList);
+                instanceSet = new();
+                _instanceMap.Add(type, instanceSet);
             }
 
-            return instanceList;
+            return instanceSet;
         }
 
         public bool Contains(Type type)
         {
             return (_instanceMap.TryGetValue(type, out var instanceList) &&
                     instanceList.Count > 0);
-        }
-
-        public static void Move(Type type, InfuseInstanceMap source, InfuseInstanceMap dest)
-        {
-            var sourceList= source.GetInstanceList(type);
-            var destList = dest.GetInstanceList(type);
-
-            if (destList.Count > 0)
-            {
-                throw new InfuseException($"Cannot transfer instances of type {type} because the destination already has instances.");
-            }
-
-            source._instanceMap[type] = destList;
-            dest._instanceMap[type] = sourceList;
         }
     }
 }

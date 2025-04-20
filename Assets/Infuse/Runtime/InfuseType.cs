@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Infuse
 {
     public class InfuseType
     {
         public Type Type => _type;
+        public bool Resolved { get; set; }
+        
         public HashSet<Type> Provides => _provides;
         public HashSet<Type> Requires => _requires;
 
@@ -29,11 +32,14 @@ namespace Infuse
             
             _provides = new HashSet<Type>(provides ?? Array.Empty<Type>());
             _requires = new HashSet<Type>(_infuseFunc.Dependencies);
+
+            Resolved = (_requires.Count == 0);
         }
         
-        public void Infuse(object instance, InfuseInstanceMap instanceMap)
+        public Awaitable Infuse(object instance,
+                                InfuseInstanceMap instanceMap)
         {
-            _infuseFunc.Invoke(instance, instanceMap);
+            return _infuseFunc.Invoke(instance, instanceMap);
         }
 
         public void Defuse(object instance)

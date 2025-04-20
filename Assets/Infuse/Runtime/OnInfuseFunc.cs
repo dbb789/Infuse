@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Infuse
 {
@@ -7,20 +8,20 @@ namespace Infuse
     {
         public HashSet<Type> Dependencies => _dependencies;
 
-        private Action<object, InfuseInstanceMap> _func;
+        private Func<object, InfuseInstanceMap, Awaitable> _func;
         private HashSet<Type> _dependencies;
 
-        public OnInfuseFunc(Action<object, InfuseInstanceMap> func,
+        public OnInfuseFunc(Func<object, InfuseInstanceMap, Awaitable> func,
                             HashSet<Type> dependencies)
         {
             _func = func;
             _dependencies = dependencies ?? new HashSet<Type>();
         }
         
-        public void Invoke(object instance,
-                           InfuseInstanceMap instanceMap)
+        public Awaitable Invoke(object instance,
+                                InfuseInstanceMap instanceMap)
         {
-            _func?.Invoke(instance, instanceMap);
+            return _func.Invoke(instance, instanceMap);
         }
     }
 }

@@ -10,9 +10,13 @@ namespace InfuseExample
             InfuseManager.Infuse(this);
         }
 
-        private void OnInfuse()
+        private async Awaitable OnInfuse()
         {
-            Debug.Log("ExampleServiceB.OnInfuse()");
+            Debug.Log(">> ExampleServiceB.OnInfuse()");
+
+            await Awaitable.NextFrameAsync();
+
+            Debug.Log("<< ExampleServiceB.OnInfuse()");
         }
         
         private void OnDefuse()

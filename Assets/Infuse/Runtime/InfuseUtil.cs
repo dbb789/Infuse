@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using UnityEngine;
 
 namespace Infuse
 {
@@ -22,9 +23,14 @@ namespace Infuse
                 if (interfaceType.IsGenericType &&
                     interfaceType.GetGenericTypeDefinition() == typeof(InfuseProvides<>))
                 {
-                    foreach (var genericArgument in interfaceType.GenericTypeArguments)
+                    foreach (var providesType in interfaceType.GenericTypeArguments)
                     {
-                        provides.Add(genericArgument);
+                        if (!providesType.IsAssignableFrom(type))
+                        {
+                            throw new InfuseException($"Type {type} does not derive from {providesType}");
+                        }
+                        
+                        provides.Add(providesType);
                     }
                 }
             }
@@ -57,7 +63,7 @@ namespace Infuse
 
         private static OnInfuseFunc CreateOnInfuseFunc(List<MethodInfo> methods)
         {
-            Action<object, InfuseInstanceMap> func = null;
+            Func<object, InfuseInstanceMap, Awaitable> func = null;
             var dependencies = new HashSet<Type>();
             
             foreach (var method in methods)
@@ -67,62 +73,126 @@ namespace Infuse
                     throw new InfuseException($"Generic methods are not supported: {method.Name}");
                 }
 
-                if (method.ReturnType != typeof(void))
+                if (method.ReturnType == typeof(void))
                 {
-                    throw new InfuseException($"Return type must be void: {method.Name}");
-                }
+                    var parameters = method.GetParameters();
+                    var parameterTypeArray = new Type[parameters.Length];
 
-                var parameters = method.GetParameters();
-                var parameterTypeArray = new Type[parameters.Length];
-
-                for (int i = 0; i < parameters.Length; i++)
-                {
-                    var parameter = parameters[i];
-                    
-                    if (parameter.IsIn)
+                    for (int i = 0; i < parameters.Length; i++)
                     {
-                        throw new InfuseException($"In parameters are not supported: {parameter.Name}");
-                    }
+                        var parameter = parameters[i];
 
-                    if (parameter.IsOut)
-                    {
-                        throw new InfuseException($"Out parameters are not supported: {parameter.Name}");
-                    }
-                    
-                    dependencies.Add(parameter.ParameterType);
-                    parameterTypeArray[parameter.Position] = parameter.ParameterType;
-                }
-                
-                Action<object, InfuseInstanceMap> invoker = (instance, instanceMap) =>
-                {
-                    var parameters = new object[parameterTypeArray.Length];
-
-                    for (int i = 0; i < parameterTypeArray.Length; i++)
-                    {
-                        var parameterType = parameterTypeArray[i];
-
-                        if (instanceMap.TryGetInstance(parameterType, out var value))
+                        if (parameter.IsIn)
                         {
-                            parameters[i] = value;
+                            throw new InfuseException($"In parameters are not supported: {parameter.Name}");
                         }
-                        else
+
+                        if (parameter.IsOut)
                         {
-                            throw new InfuseException($"Missing dependency: {parameterType}");
+                            throw new InfuseException($"Out parameters are not supported: {parameter.Name}");
                         }
+
+                        dependencies.Add(parameter.ParameterType);
+                        parameterTypeArray[parameter.Position] = parameter.ParameterType;
                     }
 
-                    method.Invoke(instance, parameters);
-                };
+                    Func<object, InfuseInstanceMap, Awaitable> invoker = (instance, instanceMap) =>
+                    {
+                        var parameters = new object[parameterTypeArray.Length];
 
-                if (func != null)
+                        for (int i = 0; i < parameterTypeArray.Length; i++)
+                        {
+                            var parameterType = parameterTypeArray[i];
+
+                            if (instanceMap.TryGetInstance(parameterType, out var value))
+                            {
+                                parameters[i] = value;
+                            }
+                            else
+                            {
+                                throw new InfuseException($"Missing dependency: {parameterType}");
+                            }
+                        }
+
+                        method.Invoke(instance, parameters);
+
+                        return CompletedAwaitable.Instance;
+                    };
+
+                    if (func != null)
+                    {
+                        func = async (instance, instanceMap) =>
+                        {
+                            await func(instance, instanceMap);
+                            await invoker(instance, instanceMap);
+                        };
+                    }
+                    else
+                    {
+                        func = invoker;
+                    }
+                }
+                else if (method.ReturnType == typeof(Awaitable))
                 {
-                    func += invoker;
+                    var parameters = method.GetParameters();
+                    var parameterTypeArray = new Type[parameters.Length];
+
+                    for (int i = 0; i < parameters.Length; i++)
+                    {
+                        var parameter = parameters[i];
+
+                        if (parameter.IsIn)
+                        {
+                            throw new InfuseException($"In parameters are not supported: {parameter.Name}");
+                        }
+
+                        if (parameter.IsOut)
+                        {
+                            throw new InfuseException($"Out parameters are not supported: {parameter.Name}");
+                        }
+
+                        dependencies.Add(parameter.ParameterType);
+                        parameterTypeArray[parameter.Position] = parameter.ParameterType;
+                    }
+
+                    Func<object, InfuseInstanceMap, Awaitable> invoker = (instance, instanceMap) =>
+                    {
+                        var parameters = new object[parameterTypeArray.Length];
+
+                        for (int i = 0; i < parameterTypeArray.Length; i++)
+                        {
+                            var parameterType = parameterTypeArray[i];
+
+                            if (instanceMap.TryGetInstance(parameterType, out var value))
+                            {
+                                parameters[i] = value;
+                            }
+                            else
+                            {
+                                throw new InfuseException($"Missing dependency: {parameterType}");
+                            }
+                        }
+
+                        return (Awaitable)method.Invoke(instance, parameters);
+                    };
+
+                    if (func != null)
+                    {
+                        func = async (instance, instanceMap) =>
+                        {
+                            await func(instance, instanceMap);
+                            await invoker(instance, instanceMap);
+                        };
+                    }
+                    else
+                    {
+                        func = invoker;
+                    }
                 }
                 else
                 {
-                    func = invoker;
+                    throw new InfuseException($"Return type must be void: {method.Name}");
                 }
-
             }
 
             return new OnInfuseFunc(func, dependencies);
@@ -166,6 +236,18 @@ namespace Infuse
             }
 
             return new OnDefuseFunc(func);
+        }
+
+        private static class CompletedAwaitable
+        {
+            private static readonly AwaitableCompletionSource _completionSource = new();
+
+            static CompletedAwaitable()
+            {
+                _completionSource.SetResult();
+            }
+
+            public static Awaitable Instance => _completionSource.Awaitable;
         }
     }
 }
