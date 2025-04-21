@@ -15,7 +15,7 @@ namespace Infuse
             _requiresServiceMap = new Dictionary<Type, List<InfuseType>>();
         }
         
-        public InfuseType GetInfuseType(Type type)
+        public InfuseType GetInfuseType(Type type, InfuseServiceMap serviceMap)
         {
             InfuseType infuseType;
             
@@ -36,6 +36,8 @@ namespace Infuse
                         _requiresServiceMap.Add(requiredService, new List<InfuseType> { infuseType });
                     }
                 }
+
+                infuseType.Resolved = serviceMap.ContainsAll(infuseType.RequiredServices);
             }
 
             return infuseType;

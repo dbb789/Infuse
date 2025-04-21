@@ -133,13 +133,15 @@ namespace Infuse
             var dependencies = new HashSet<Type>();
             var parameterTypeArray = CreateParameterTypeArray(method, dependencies);
             var invokedMethod = method;
+
+            // Allocate a reusable array of parameters for the method
+            // below. This is of course not at all thread safe.
+            var parameters = new object[parameterTypeArray.Length];
             
             return new OnInfuseFunc((instance, serviceMap, infuseType, completionHandler) =>
             {
                 try
                 {
-                    var parameters = new object[parameterTypeArray.Length];
-
                     for (int i = 0; i < parameterTypeArray.Length; i++)
                     {
                         var parameterType = parameterTypeArray[i];
@@ -169,12 +171,14 @@ namespace Infuse
             var dependencies = new HashSet<Type>();
             var parameterTypeArray = CreateParameterTypeArray(method, dependencies);
             var invokedMethod = method;
+
+            // As above.
+            var parameters = new object[parameterTypeArray.Length];
             
             return new OnInfuseFunc(async (instance, serviceMap, infuseType, completionHandler) =>
             {
                 try
                 {
-                    var parameters = new object[parameterTypeArray.Length];
 
                     for (int i = 0; i < parameterTypeArray.Length; i++)
                     {

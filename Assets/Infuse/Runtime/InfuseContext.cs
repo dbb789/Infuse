@@ -27,6 +27,7 @@ namespace Infuse
         private InfuseServiceMap _serviceMap;
         private InfuseInstanceMap _instanceMap;
         private InfuseContextCompletionHandler _completionHandler;
+        private Action<object> _destroyCancellationCallback;
         
         public InfuseContext()
         {
@@ -34,6 +35,7 @@ namespace Infuse
             _serviceMap = new();
             _instanceMap = new();
             _completionHandler = new(this);
+            _destroyCancellationCallback = (instance) => Defuse(instance);
         }
         
         public void Infuse(object instance)
@@ -55,19 +57,19 @@ namespace Infuse
             
             if (instance is MonoBehaviour monoBehaviour)
             {
-                disposable = monoBehaviour.destroyCancellationToken.Register(() => Defuse(instance));
+                disposable = monoBehaviour.destroyCancellationToken.Register(_destroyCancellationCallback, instance);
             }
 
             _instanceMap.Add(type, instance, disposable);
             
-            var infuseType = _typeMap.GetInfuseType(type);
+            var infuseType = _typeMap.GetInfuseType(type, _serviceMap);
             
             if (infuseType.Resolved)
             {
                 OnResolved(infuseType, instance);
             }
         }
-        
+
         public void Defuse(object instance)
         {
             if (instance == null)
@@ -83,7 +85,7 @@ namespace Infuse
                 return;
             }
 
-            var infuseType = _typeMap.GetInfuseType(type);
+            var infuseType = _typeMap.GetInfuseType(type, _serviceMap);
             
             if (infuseType.Resolved)
             {
@@ -95,7 +97,7 @@ namespace Infuse
         
         private void UpdateResolvedState(InfuseType infuseType)
         {
-            bool nextResolved = IsResolved(infuseType);
+            bool nextResolved = _serviceMap.ContainsAll(infuseType.RequiredServices);
 
             if (infuseType.Resolved != nextResolved)
             {
@@ -173,19 +175,6 @@ namespace Infuse
             {
                 UpdateResolvedState(requiredType);
             }
-        }
-        
-        private bool IsResolved(InfuseType infuseType)
-        {
-            foreach (var serviceType in infuseType.RequiredServices)
-            {
-                if (!_serviceMap.Contains(serviceType))
-                {
-                    return false;
-                }
-            }
-            
-            return true;
         }
     }
 }

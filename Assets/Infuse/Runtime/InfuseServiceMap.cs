@@ -40,14 +40,22 @@ namespace Infuse
             _serviceMap.Remove(type);
         }
 
-        public bool Contains(Type type)
+        public bool ContainsAll(HashSet<Type> requiredServices)
         {
-            return _serviceMap.ContainsKey(type);
+            foreach (var type in requiredServices)
+            {
+                if (!_serviceMap.ContainsKey(type))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
         
         public bool TryGetService(Type type, out object instance)
         {
             return _serviceMap.TryGetValue(type, out instance);
-        }        
+        }
     }
 }
