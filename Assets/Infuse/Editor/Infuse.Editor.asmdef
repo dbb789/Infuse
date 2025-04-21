@@ -1,0 +1,18 @@
+{
+    "name": "Infuse.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:2be2a18b98d408c4f990c8066667d1aa"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

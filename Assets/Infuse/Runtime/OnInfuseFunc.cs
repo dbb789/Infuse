@@ -10,6 +10,11 @@ namespace Infuse
 
         private Action<object, InfuseServiceMap, InfuseType, IInfuseCompletionHandler> _func;
         private HashSet<Type> _dependencies;
+        
+        public OnInfuseFunc() : this(null, null)
+        {
+            // ..
+        }
 
         public OnInfuseFunc(Action<object, InfuseServiceMap, InfuseType, IInfuseCompletionHandler> func,
                             HashSet<Type> dependencies)

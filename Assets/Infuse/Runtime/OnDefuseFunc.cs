@@ -7,7 +7,7 @@ namespace Infuse
     {
         private Action<object> _func;
 
-        public OnDefuseFunc(Action<object> func)
+        public OnDefuseFunc(Action<object> func = null)
         {
             _func = func;
         }
