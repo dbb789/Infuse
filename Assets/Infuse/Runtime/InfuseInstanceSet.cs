@@ -7,40 +7,55 @@ namespace Infuse
     {
         public struct Enumerator
         {
-            private HashSet<object>.Enumerator _enumerator;
+            private Dictionary<object, IDisposable>.Enumerator _enumerator;
             
-            public Enumerator(HashSet<object> instanceSet)
+            public Enumerator(Dictionary<object, IDisposable> instanceSet)
             {
                 _enumerator = instanceSet.GetEnumerator();
             }
 
-            public object Current => _enumerator.Current;
+            public object Current => _enumerator.Current.Key;
             public bool MoveNext() => _enumerator.MoveNext();
             public void Dispose() => _enumerator.Dispose();
         }
         
         public int Count => _instanceSet.Count;
         
-        private HashSet<object> _instanceSet;
+        private Dictionary<object, IDisposable> _instanceSet;
 
         public InfuseInstanceSet()
         {
             _instanceSet = new();
         }
-        
-        public bool Add(object instance)
+
+        public bool Add(object instance, IDisposable disposable = null)
         {
-            return _instanceSet.Add(instance);
+            if (!_instanceSet.ContainsKey(instance))
+            {
+                _instanceSet.Add(instance, disposable);
+
+                return true;
+            }
+
+            return false;
         }
 
         public bool Remove(object instance)
         {
-            return _instanceSet.Remove(instance);
+            if (_instanceSet.TryGetValue(instance, out var disposable))
+            {
+                _instanceSet.Remove(instance);
+                disposable?.Dispose();
+
+                return true;
+            }
+
+            return false;
         }
 
         public bool Contains(object instance)
         {
-            return _instanceSet.Contains(instance);
+            return _instanceSet.ContainsKey(instance);
         }
         
         public Enumerator GetEnumerator()

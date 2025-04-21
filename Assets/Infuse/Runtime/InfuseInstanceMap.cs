@@ -14,9 +14,9 @@ namespace Infuse
             _instanceMap = new Dictionary<Type, InfuseInstanceSet>();
         }
 
-        public void Add(Type type, object instance)
+        public void Add(Type type, object instance, IDisposable disposable = null)
         {
-            GetInstanceSet(type).Add(instance);
+            GetInstanceSet(type).Add(instance, disposable);
         }
         
         public void Remove(Type type, object instance)

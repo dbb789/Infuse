@@ -7,7 +7,7 @@ namespace InfuseExample
     {
         private void Awake()
         {
-            InfuseManager.InfuseMonoBehaviour(this);
+            InfuseManager.Infuse(this);
         }
 
         protected void OnInfuse(ExampleServiceA exampleServiceA)

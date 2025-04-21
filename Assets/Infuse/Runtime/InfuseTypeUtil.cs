@@ -89,7 +89,7 @@ namespace Infuse
                         }
                         else
                         {
-                            Debug.LogError($"Infuse: Multiple OnInfuse methods found in {type}: {infuseMethod.Name} and {method.Name}");
+                            Debug.LogError($"Infuse: Multiple OnInfuse methods found in {type}: {infuseMethod} and {method}");
                         }
                     }
                 }
@@ -106,7 +106,7 @@ namespace Infuse
                         {
                             // I can't see how this could actually happen but
                             // just in case.
-                            Debug.LogError($"Infuse: Multiple OnDefuse methods found in {type}: {defuseMethod.Name} and {method.Name}");
+                            Debug.LogError($"Infuse: Multiple OnDefuse methods found in {type}: {defuseMethod} and {method}");
                         }
                     }
                 }
@@ -215,16 +215,21 @@ namespace Infuse
         
         private static bool ValidateOnInfuseMethod(MethodInfo method)
         {
+            if (method.IsAbstract)
+            {
+                return false;
+            }
+
             if (method.IsGenericMethod)
             {
-                Debug.LogError($"Infuse: OnInfuse method cannot be generic: {method.Name}");
+                Debug.LogError($"Infuse: OnInfuse method cannot be generic: {method}");
                 return false;
             }
 
             if (method.ReturnType != typeof(void) &&
                 method.ReturnType != typeof(Awaitable))
             {
-                Debug.LogError($"Infuse: OnInfuse method must return void or Awaitable: {method.Name}");
+                Debug.LogError($"Infuse: OnInfuse method must return void or Awaitable: {method}");
                 return false;
             }
 
@@ -233,21 +238,26 @@ namespace Infuse
 
         private static bool ValidateOnDefuseMethod(MethodInfo method)
         {
-            if (method.IsGenericMethod)
+            if (method.IsAbstract)
             {
-                Debug.LogError($"Infuse: OnDefuse method cannot be generic: {method.Name}");
                 return false;
             }
 
+            if (method.IsGenericMethod)
+            {
+                Debug.LogError($"Infuse: OnDefuse method cannot be generic: {method}");
+                return false;
+            }
+            
             if (method.ReturnType != typeof(void))
             {
-                Debug.LogError($"Infuse: OnDefuse method must return void: {method.Name}");
+                Debug.LogError($"Infuse: OnDefuse method must return void: {method}");
                 return false;
             }
 
             if (method.GetParameters().Length != 0)
             {
-                Debug.LogError($"Infuse: OnDefuse method cannot have parameters: {method.Name}");
+                Debug.LogError($"Infuse: OnDefuse method cannot have parameters: {method}");
                 return false;
             }
 

@@ -36,18 +36,6 @@ namespace Infuse
             _completionHandler = new(this);
         }
         
-        public void InfuseMonoBehaviour(MonoBehaviour instance)
-        {
-            if (instance == null)
-            {
-                throw new ArgumentNullException(nameof(instance));
-            }
-            
-            instance.destroyCancellationToken.Register(() => Defuse(instance));
-
-            Infuse(instance);
-        }
-        
         public void Infuse(object instance)
         {
             if (instance == null)
@@ -62,8 +50,15 @@ namespace Infuse
                 Debug.LogWarning($"Instance of type {type} is already infused.");
                 return;
             }
+
+            IDisposable disposable = null;
             
-            _instanceMap.Add(type, instance);
+            if (instance is MonoBehaviour monoBehaviour)
+            {
+                disposable = monoBehaviour.destroyCancellationToken.Register(() => Defuse(instance));
+            }
+
+            _instanceMap.Add(type, instance, disposable);
             
             var infuseType = _typeMap.GetInfuseType(type);
             

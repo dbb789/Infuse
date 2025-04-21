@@ -13,11 +13,6 @@ namespace Infuse
             _context.Infuse(instance);
         }
         
-        public static void InfuseMonoBehaviour(MonoBehaviour instance)
-        {
-            _context.InfuseMonoBehaviour(instance);
-        }
-
         public static void Defuse(object instance)
         {
             _context.Defuse(instance);
