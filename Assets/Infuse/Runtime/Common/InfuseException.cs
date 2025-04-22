@@ -1,6 +1,6 @@
 using System;
 
-namespace Infuse
+namespace Infuse.Common
 {
     public class InfuseException : Exception
     {

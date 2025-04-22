@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using UnityEngine;
 using Infuse.Collections;
+using Infuse.Common;
 
 namespace Infuse.Util
 {
@@ -22,20 +23,9 @@ namespace Infuse.Util
 
             foreach (var interfaceType in interfaces)
             {
-                if (interfaceType.IsGenericType &&
-                    interfaceType.GetGenericTypeDefinition() == typeof(InfuseService<>))
+                if (InfuseServiceUtil.TryGetServiceType(interfaceType, out var serviceType))
                 {
-                    foreach (var serviceType in interfaceType.GenericTypeArguments)
-                    {
-                        if (serviceType.IsAssignableFrom(type))
-                        {
-                            provides.Add(serviceType);
-                        }
-                        else
-                        {
-                            Debug.LogError($"Infuse: Type {type} does not derive from {serviceType} - ignoring declaration.");
-                        }
-                    }
+                    provides.Add(serviceType);
                 }
             }
 

@@ -27,7 +27,8 @@ namespace Infuse
 
         public InfuseTypeInfoMap TypeMap => _typeMap;
         public InfuseInstanceMap InstanceMap => _instanceMap;
-
+        public InfuseServiceMap ServiceMap => _serviceMap;
+        
         private InfuseTypeInfoMap _typeMap;
         private InfuseServiceMap _serviceMap;
         private InfuseInstanceMap _instanceMap;
@@ -172,7 +173,7 @@ namespace Infuse
             }
         }
 
-        public void UnregisterService(Type serviceType, object instance)
+        private void UnregisterService(Type serviceType, object instance)
         {
             _serviceMap.Unregister(serviceType, instance);
             

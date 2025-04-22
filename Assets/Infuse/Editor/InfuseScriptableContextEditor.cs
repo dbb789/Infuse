@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor;
@@ -54,12 +55,11 @@ namespace Infuse.Editor
                     });
 
 
-                    // foreach (var requiredService in type.RequiredServices)
-                    // {
-                    //     var serviceLabel = new Label(requiredService);
-                    //     typeElement.Add(serviceLabel);
-                    // }
-
+                    foreach (var providedService in type.ProvidedServices)
+                    {
+                        var serviceLabel = new Label($"Provides : {providedService}");
+                        typeElementBox.Add(serviceLabel);
+                    }
 
                     typeElementFoldout.Add(typeElementBox);
                     typeList.Add(typeElementFoldout);
@@ -123,7 +123,41 @@ namespace Infuse.Editor
 
                     instanceList.Add(instanceElement);
                 }
-            });
+            }).Every(1000);
+            
+            var serviceListFoldout = new Foldout
+            {
+                text = "Registered Services"
+            };
+
+            var serviceList = new ScrollView
+            {
+                verticalScrollerVisibility = ScrollerVisibility.Auto,
+                horizontalScrollerVisibility = ScrollerVisibility.Hidden
+            };
+
+            serviceListFoldout.Add(serviceList);
+            root.Add(serviceListFoldout);
+
+            serviceList.schedule.Execute(() =>
+            {
+                if (!Application.isPlaying)
+                {
+                    return;
+                }
+
+                var context = (InfuseScriptableContext)target;
+
+                serviceList.Clear();
+
+                foreach (var serviceType in context.ServiceMap.Types)
+                {
+                    var serviceElement = new VisualElement();
+
+                    serviceElement.Add(new Label($"{serviceType}"));
+                    serviceList.Add(serviceElement);
+                }
+            }).Every(1000);
 
             return root;
         }

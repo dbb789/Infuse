@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Infuse.Common;
 
 namespace Infuse.Collections
 {
     public class InfuseServiceMap
     {
+        public IEnumerable<Type> Types => _serviceMap.Keys;
+        
         private Dictionary<Type, object> _serviceMap;
 
         public InfuseServiceMap()
@@ -44,7 +47,7 @@ namespace Infuse.Collections
         {
             foreach (var type in requiredServices)
             {
-                if (!_serviceMap.ContainsKey(type))
+                if (!_serviceMap.ContainsKey(type) && !CreateContainerType(type))
                 {
                     return false;
                 }
@@ -60,7 +63,26 @@ namespace Infuse.Collections
                 return instance;
             }
 
+            if (CreateContainerType(type))
+            {
+                return _serviceMap[type];
+            }
+
             throw new InfuseException($"Service of type {type} is not registered.");
+        }
+
+        private bool CreateContainerType(Type type)
+        {
+            if (!typeof(InfuseServiceContainer).IsAssignableFrom(type))
+            {
+                return false;
+            }
+            
+            var container = Activator.CreateInstance(type);
+            
+            _serviceMap.Add(type, container);
+
+            return true;
         }
     }
 }
