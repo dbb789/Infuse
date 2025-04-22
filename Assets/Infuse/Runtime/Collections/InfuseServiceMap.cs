@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Infuse
+namespace Infuse.Collections
 {
     public class InfuseServiceMap
     {
@@ -20,7 +20,7 @@ namespace Infuse
                 throw new InfuseException($"Service of type {type} is already registered.");
             }
             
-            Debug.Log($"Registering service of type {type}.");
+            Debug.Log($"Infuse: Registering service of type {type}.");
             _serviceMap.Add(type, instance);
         }
         
@@ -36,7 +36,7 @@ namespace Infuse
                 throw new InfuseException($"Service of type {type} is not the same instance.");
             }
 
-            Debug.Log($"Unregistering service of type {type}.");
+            Debug.Log($"Infuse: Unregistering service of type {type}.");
             _serviceMap.Remove(type);
         }
 

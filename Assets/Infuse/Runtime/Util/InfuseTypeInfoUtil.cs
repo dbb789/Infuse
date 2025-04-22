@@ -4,12 +4,13 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using UnityEngine;
+using Infuse.Collections;
 
-namespace Infuse
+namespace Infuse.Util
 {
-    public static class InfuseTypeUtil
+    public static class InfuseTypeInfoUtil
     {
-        public static InfuseType CreateInfuseType(Type type)
+        public static InfuseTypeInfo CreateInfuseTypeInfo(Type type)
         {
             if (type == null)
             {
@@ -59,10 +60,10 @@ namespace Infuse
                 baseType = baseType.BaseType;
             }
             
-            return new InfuseType(type,
-                                  provides.AsEnumerable<Type>(),
-                                  CreateOnInfuseFunc(type, infuseMethod),
-                                  CreateOnDefuseFunc(type, defuseMethod));
+            return new InfuseTypeInfo(type,
+                                      provides.AsEnumerable<Type>(),
+                                      CreateOnInfuseFunc(type, infuseMethod),
+                                      CreateOnDefuseFunc(type, defuseMethod));
         }
 
         private static void TryGetInfuseMethodsFromType(Type type,

@@ -6,7 +6,7 @@ namespace Infuse
 {
     public static class InfuseManager
     {
-        private static readonly InfuseContext _context = new();
+        private static readonly InfuseContext _context = GetGlobalContext();
         
         public static void Infuse(object instance, bool defuseOnDestroy = true)
         {
@@ -16,6 +16,18 @@ namespace Infuse
         public static void Defuse(object instance)
         {
             _context.Defuse(instance);
+        }
+
+        private static InfuseContext GetGlobalContext()
+        {
+            var context = Resources.Load<InfuseScriptableContext>("InfuseGlobalContext");
+
+            if (context == null)
+            {
+                throw new InfuseException("InfuseGlobalContext asset not found.");
+            }
+            
+            return context;
         }
     }
 }

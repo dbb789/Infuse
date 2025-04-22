@@ -1,7 +1,7 @@
-using Infuse;
 using NUnit.Framework;
+using Infuse.Collections;
 
-namespace Infuse.Tests
+namespace Infuse.Collections.Tests
 {
     public class InfuseInstanceMap_Tests
     {

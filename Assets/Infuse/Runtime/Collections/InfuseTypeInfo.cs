@@ -2,17 +2,17 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Infuse
+namespace Infuse.Collections
 {
-    public class InfuseType
+    public class InfuseTypeInfo
     {
-        public Type Type => _type;
+        public Type InstanceType => _instanceType;
         public bool Resolved { get; set; }
         
         public HashSet<Type> ProvidedServices => _providedServices;
         public HashSet<Type> RequiredServices => _requiredServices;
 
-        private Type _type;
+        private Type _instanceType;
         
         private HashSet<Type> _providedServices;
         private HashSet<Type> _requiredServices;
@@ -20,12 +20,12 @@ namespace Infuse
         private OnInfuseFunc _infuseFunc;
         private OnDefuseFunc _defuseFunc;
         
-        public InfuseType(Type type,
-                          IEnumerable<Type> providedServices,
-                          OnInfuseFunc infuseFunc,
-                          OnDefuseFunc defuseFunc)
+        public InfuseTypeInfo(Type instanceType,
+                              IEnumerable<Type> providedServices,
+                              OnInfuseFunc infuseFunc,
+                              OnDefuseFunc defuseFunc)
         {
-            _type = type;
+            _instanceType = instanceType;
             
             _infuseFunc = infuseFunc ?? throw new ArgumentNullException(nameof(infuseFunc));
             _defuseFunc = defuseFunc ?? throw new ArgumentNullException(nameof(defuseFunc));

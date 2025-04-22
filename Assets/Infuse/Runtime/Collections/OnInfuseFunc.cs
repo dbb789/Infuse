@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Infuse
+namespace Infuse.Collections
 {
     public class OnInfuseFunc
     {
         public HashSet<Type> Dependencies => _dependencies;
 
-        private Action<object, InfuseServiceMap, InfuseType, IInfuseCompletionHandler> _func;
+        private Action<object, InfuseServiceMap, InfuseTypeInfo, IInfuseCompletionHandler> _func;
         private HashSet<Type> _dependencies;
         
         public OnInfuseFunc() : this(null, null)
@@ -16,7 +16,7 @@ namespace Infuse
             // ..
         }
 
-        public OnInfuseFunc(Action<object, InfuseServiceMap, InfuseType, IInfuseCompletionHandler> func,
+        public OnInfuseFunc(Action<object, InfuseServiceMap, InfuseTypeInfo, IInfuseCompletionHandler> func,
                             HashSet<Type> dependencies)
         {
             _func = func;
@@ -25,16 +25,16 @@ namespace Infuse
 
         public void Invoke(object instance,
                            InfuseServiceMap serviceMap,
-                           InfuseType infuseType,
+                           InfuseTypeInfo typeInfo,
                            IInfuseCompletionHandler completionHandler)
         {
             if (_func != null)
             {
-                _func.Invoke(instance, serviceMap, infuseType, completionHandler);
+                _func.Invoke(instance, serviceMap, typeInfo, completionHandler);
             }
             else
             {
-                completionHandler.OnInfuseCompleted(infuseType, instance);
+                completionHandler.OnInfuseCompleted(typeInfo, instance);
             }
         }
     }

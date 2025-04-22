@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace Infuse
+namespace Infuse.Collections
 {
     public class InfuseInstanceMap
     {
+        public IEnumerable<Type> Types => _instanceMap?.Keys ?? Enumerable.Empty<Type>();
+        
         private Dictionary<Type, InfuseInstanceSet> _instanceMap;
 
         public InfuseInstanceMap()
