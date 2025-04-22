@@ -1,15 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Infuse.Collections
 {
     public class OnInfuseFunc
     {
-        public HashSet<Type> Dependencies => _dependencies;
+        public List<Type> Dependencies => _dependencies;
 
         private Action<object, InfuseServiceMap, InfuseTypeInfo, IInfuseCompletionHandler> _func;
-        private HashSet<Type> _dependencies;
+        private List<Type> _dependencies;
         
         public OnInfuseFunc() : this(null, null)
         {
@@ -17,10 +18,10 @@ namespace Infuse.Collections
         }
 
         public OnInfuseFunc(Action<object, InfuseServiceMap, InfuseTypeInfo, IInfuseCompletionHandler> func,
-                            HashSet<Type> dependencies)
+                            IEnumerable<Type> dependencies)
         {
             _func = func;
-            _dependencies = dependencies ?? new HashSet<Type>();
+            _dependencies = new List<Type>(dependencies ?? Enumerable.Empty<Type>());
         }
 
         public void Invoke(object instance,

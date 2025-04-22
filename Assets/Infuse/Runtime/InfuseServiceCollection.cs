@@ -4,7 +4,7 @@ using Infuse.Collections;
 
 namespace Infuse
 {
-    public class InfuseServiceCollection<TServiceType> : InfuseTransient where TServiceType : class, new()
+    public class InfuseServiceCollection<TServiceType> : InfuseTransient
     {
         public IEnumerable<TServiceType> Services => _services;
         public int Count => _services.Count;

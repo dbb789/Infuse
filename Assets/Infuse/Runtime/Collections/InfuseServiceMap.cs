@@ -23,6 +23,11 @@ namespace Infuse.Collections
             {
                 throw new InfuseException($"Service of type {type} is already registered.");
             }
+
+            if (!type.IsAssignableFrom(instance.GetType()))
+            {
+                throw new InfuseException($"Type {type} is not assignable from {instance.GetType()}.");
+            }
             
             Debug.Log($"Infuse: Registering service of type {type}.");
             _serviceMap.Add(type, instance);
@@ -44,11 +49,12 @@ namespace Infuse.Collections
             _serviceMap.Remove(type);
         }
 
-        public bool ContainsAll(HashSet<Type> requiredServices)
+        public bool ContainsAll(List<Type> requiredServices)
         {
             foreach (var type in requiredServices)
             {
-                if (!_serviceMap.ContainsKey(type) && !TryCreateTransientType(type, out var _))
+                if (!_serviceMap.ContainsKey(type) &&
+                    !TryCreateTransientType(type, out var _))
                 {
                     return false;
                 }

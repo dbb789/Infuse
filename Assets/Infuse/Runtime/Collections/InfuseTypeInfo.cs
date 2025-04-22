@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Infuse.Collections
@@ -9,13 +10,13 @@ namespace Infuse.Collections
         public Type InstanceType => _instanceType;
         public bool Resolved { get; set; }
         
-        public HashSet<Type> ProvidedServices => _providedServices;
-        public HashSet<Type> RequiredServices => _requiredServices;
+        public List<Type> ProvidedServices => _providedServices;
+        public List<Type> RequiredServices => _requiredServices;
 
         private Type _instanceType;
         
-        private HashSet<Type> _providedServices;
-        private HashSet<Type> _requiredServices;
+        private List<Type> _providedServices;
+        private List<Type> _requiredServices;
         
         private OnInfuseFunc _infuseFunc;
         private OnDefuseFunc _defuseFunc;
@@ -30,8 +31,8 @@ namespace Infuse.Collections
             _infuseFunc = infuseFunc ?? throw new ArgumentNullException(nameof(infuseFunc));
             _defuseFunc = defuseFunc ?? throw new ArgumentNullException(nameof(defuseFunc));
             
-            _providedServices = new HashSet<Type>(providedServices ?? Array.Empty<Type>());
-            _requiredServices = new HashSet<Type>(_infuseFunc.Dependencies);
+            _providedServices = new List<Type>(providedServices ?? Enumerable.Empty<Type>());
+            _requiredServices = new List<Type>(_infuseFunc.Dependencies);
 
             // Any type with no dependencies is always resolved by definition.
             Resolved = (_requiredServices.Count == 0);

@@ -25,7 +25,17 @@ namespace Infuse.Util
             {
                 if (InfuseServiceUtil.TryGetServiceType(interfaceType, out var serviceType))
                 {
-                    provides.Add(serviceType);
+                    if (serviceType.IsAssignableFrom(type))
+                    {
+                        provides.Add(serviceType);
+                    }
+                    else
+                    {
+                        // Log this here just the once and ignore the
+                        // declaration so that we don't end up spewing the same
+                        // thing into the log over and over again.
+                        Debug.LogError($"Infuse: {serviceType} is not assignable from {type}");
+                    }
                 }
             }
 
