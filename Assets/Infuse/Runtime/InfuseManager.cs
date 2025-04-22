@@ -8,9 +8,9 @@ namespace Infuse
     {
         private static readonly InfuseContext _context = new();
         
-        public static void Infuse(object instance)
+        public static void Infuse(object instance, bool defuseOnDestroy = true)
         {
-            _context.Infuse(instance);
+            _context.Infuse(instance, defuseOnDestroy);
         }
         
         public static void Defuse(object instance)

@@ -38,7 +38,7 @@ namespace Infuse
             _destroyCancellationCallback = (instance) => Defuse(instance);
         }
         
-        public void Infuse(object instance)
+        public void Infuse(object instance, bool defuseOnDestroy = true)
         {
             if (instance == null)
             {
@@ -55,7 +55,7 @@ namespace Infuse
 
             IDisposable disposable = null;
             
-            if (instance is MonoBehaviour monoBehaviour)
+            if (defuseOnDestroy && instance is MonoBehaviour monoBehaviour)
             {
                 disposable = monoBehaviour.destroyCancellationToken.Register(_destroyCancellationCallback, instance);
             }

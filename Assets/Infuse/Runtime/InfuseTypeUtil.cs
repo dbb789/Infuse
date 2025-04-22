@@ -62,7 +62,7 @@ namespace Infuse
             return new InfuseType(type,
                                   provides.AsEnumerable<Type>(),
                                   CreateOnInfuseFunc(type, infuseMethod),
-                                  CreateOnDefuseFunc(defuseMethod));
+                                  CreateOnDefuseFunc(type, defuseMethod));
         }
 
         private static void TryGetInfuseMethodsFromType(Type type,
@@ -201,16 +201,23 @@ namespace Infuse
             }, dependencies);
         }
 
-        private static OnDefuseFunc CreateOnDefuseFunc(MethodInfo method)
+        private static OnDefuseFunc CreateOnDefuseFunc(Type type, MethodInfo method)
         {
             if (method == null)
             {
                 return new OnDefuseFunc();
             }
             
+            var instanceParameter = Expression.Parameter(typeof(object), "instance");
+            var invokeExpression = Expression.Lambda<Action<object>>(
+                Expression.Call(Expression.Convert(instanceParameter, type), method),
+                instanceParameter);
+
+            var invokeFunc = invokeExpression.Compile();
+            
             return new OnDefuseFunc((instance) =>
             {
-                method.Invoke(instance, null);
+                invokeFunc(instance);
             });                
         }
         
