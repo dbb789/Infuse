@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Infuse.Common;
+using Infuse.Util;
 
 namespace Infuse.Collections
 {
@@ -47,7 +48,7 @@ namespace Infuse.Collections
         {
             foreach (var type in requiredServices)
             {
-                if (!_serviceMap.ContainsKey(type) && !CreateContainerType(type))
+                if (!_serviceMap.ContainsKey(type) && !TryCreateTransientType(type, out var _))
                 {
                     return false;
                 }
@@ -63,25 +64,29 @@ namespace Infuse.Collections
                 return instance;
             }
 
-            if (CreateContainerType(type))
+            if (TryCreateTransientType(type, out var transientType))
             {
-                return _serviceMap[type];
+                return transientType;
             }
 
             throw new InfuseException($"Service of type {type} is not registered.");
         }
 
-        private bool CreateContainerType(Type type)
+        private bool TryCreateTransientType(Type type, out object transientType)
         {
-            if (!typeof(InfuseServiceContainer).IsAssignableFrom(type))
+            if (!InfuseServiceUtil.IsTransientType(type))
             {
+                transientType = default;
+                
                 return false;
             }
-            
-            var container = Activator.CreateInstance(type);
-            
-            _serviceMap.Add(type, container);
 
+            if (!_serviceMap.TryGetValue(type, out transientType))
+            {
+                transientType = Activator.CreateInstance(type);
+                _serviceMap.Add(type, transientType);
+            }
+            
             return true;
         }
     }

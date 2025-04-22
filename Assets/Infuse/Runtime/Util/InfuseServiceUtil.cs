@@ -20,5 +20,10 @@ namespace Infuse.Util
             
             return false;
         }
+
+        public static bool IsTransientType(Type type)
+        {
+            return typeof(InfuseTransient).IsAssignableFrom(type);
+        }
     }
 }

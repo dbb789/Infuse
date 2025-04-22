@@ -1,6 +1,6 @@
 namespace Infuse.Collections
 {
-    public abstract class InfuseServiceContainer
+    public abstract class InfuseTransient
     {
         // ...
     }
