@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using UnityEngine;
 
@@ -60,7 +61,7 @@ namespace Infuse
             
             return new InfuseType(type,
                                   provides.AsEnumerable<Type>(),
-                                  CreateOnInfuseFunc(infuseMethod),
+                                  CreateOnInfuseFunc(type, infuseMethod),
                                   CreateOnDefuseFunc(defuseMethod));
         }
 
@@ -113,7 +114,7 @@ namespace Infuse
             }
         }
 
-        private static OnInfuseFunc CreateOnInfuseFunc(MethodInfo method)
+        private static OnInfuseFunc CreateOnInfuseFunc(Type type, MethodInfo method)
         {
             if (method == null)
             {
@@ -122,42 +123,41 @@ namespace Infuse
             
             if (method.ReturnType == typeof(Awaitable))
             {
-                return CreateAsyncOnInfuseFunc(method);
+                return CreateAsyncOnInfuseFunc(type, method);
             }
 
-            return CreateSyncOnInfuseFunc(method);
+            return CreateSyncOnInfuseFunc(type, method);
         }
 
-        public static OnInfuseFunc CreateSyncOnInfuseFunc(MethodInfo method)
+        public static OnInfuseFunc CreateSyncOnInfuseFunc(Type type, MethodInfo method)
         {
             var dependencies = new HashSet<Type>();
             var parameterTypeArray = CreateParameterTypeArray(method, dependencies);
-            var invokedMethod = method;
 
-            // Allocate a reusable array of parameters for the method
-            // below. This is of course not at all thread safe.
-            var parameters = new object[parameterTypeArray.Length];
+            // Builds a lambda expression that looks something like;
+            // (instance, serviceMap) => ((Type)instance).OnInfuse((Type1)serviceMap.GetService(typeof(Type1)),
+            //                                                    (Type2)serviceMap.GetService(typeof(Type2)))
             
+            var instanceParameter = Expression.Parameter(typeof(object), "instance");
+            var serviceMapParameter = Expression.Parameter(typeof(InfuseServiceMap), "serviceMap");
+            var invokeExpression = Expression.Lambda<Action<object, InfuseServiceMap>>(
+                Expression.Call(Expression.Convert(instanceParameter, type),
+                                method,
+                                parameterTypeArray.Select(
+                                    t => Expression.Convert(Expression.Call(serviceMapParameter,
+                                                                            typeof(InfuseServiceMap).GetMethod("GetService"),
+                                                                            Expression.Constant(t)), t)).ToArray()),
+                instanceParameter,
+                serviceMapParameter);
+
+            var invokeFunc = invokeExpression.Compile();
+
             return new OnInfuseFunc((instance, serviceMap, infuseType, completionHandler) =>
             {
                 try
                 {
-                    for (int i = 0; i < parameterTypeArray.Length; i++)
-                    {
-                        var parameterType = parameterTypeArray[i];
-
-                        if (serviceMap.TryGetService(parameterType, out var value))
-                        {
-                            parameters[i] = value;
-                        }
-                        else
-                        {
-                            throw new InfuseException($"Missing dependency: {parameterType}");
-                        }
-                    }
-                    
-                    invokedMethod.Invoke(instance, parameters);
-                    completionHandler.OnInfuseCompleted(infuseType, instance);
+                     invokeFunc(instance, serviceMap);
+                     completionHandler.OnInfuseCompleted(infuseType, instance);
                 }
                 catch (Exception e)
                 {
@@ -166,35 +166,32 @@ namespace Infuse
             }, dependencies);
         }
         
-        public static OnInfuseFunc CreateAsyncOnInfuseFunc(MethodInfo method)
+        public static OnInfuseFunc CreateAsyncOnInfuseFunc(Type type, MethodInfo method)
         {
             var dependencies = new HashSet<Type>();
             var parameterTypeArray = CreateParameterTypeArray(method, dependencies);
             var invokedMethod = method;
 
-            // As above.
-            var parameters = new object[parameterTypeArray.Length];
-            
+            // As above except we're returning the Awaitable.
+            var instanceParameter = Expression.Parameter(typeof(object), "instance");
+            var serviceMapParameter = Expression.Parameter(typeof(InfuseServiceMap), "serviceMap");
+            var invokeExpression = Expression.Lambda<Func<object, InfuseServiceMap, Awaitable>>(
+                Expression.Call(Expression.Convert(instanceParameter, type),
+                                method,
+                                parameterTypeArray.Select(
+                                    t => Expression.Convert(Expression.Call(serviceMapParameter,
+                                                                            typeof(InfuseServiceMap).GetMethod("GetService"),
+                                                                            Expression.Constant(t)), t)).ToArray()),
+                instanceParameter,
+                serviceMapParameter);
+
+            var invokeFunc = invokeExpression.Compile();
+
             return new OnInfuseFunc(async (instance, serviceMap, infuseType, completionHandler) =>
             {
                 try
                 {
-
-                    for (int i = 0; i < parameterTypeArray.Length; i++)
-                    {
-                        var parameterType = parameterTypeArray[i];
-
-                        if (serviceMap.TryGetService(parameterType, out var value))
-                        {
-                            parameters[i] = value;
-                        }
-                        else
-                        {
-                            throw new InfuseException($"Missing dependency: {parameterType}");
-                        }
-                    }
-
-                    await (Awaitable)invokedMethod.Invoke(instance, parameters);
+                    await invokeFunc.Invoke(instance, serviceMap);
                     completionHandler.OnInfuseCompleted(infuseType, instance);
                 }
                 catch (Exception e)

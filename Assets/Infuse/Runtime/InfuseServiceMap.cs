@@ -53,9 +53,14 @@ namespace Infuse
             return true;
         }
         
-        public bool TryGetService(Type type, out object instance)
+        public object GetService(Type type)
         {
-            return _serviceMap.TryGetValue(type, out instance);
+            if (_serviceMap.TryGetValue(type, out var instance))
+            {
+                return instance;
+            }
+
+            throw new InfuseException($"Service of type {type} is not registered.");
         }
     }
 }
