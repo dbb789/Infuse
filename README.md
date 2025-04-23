@@ -243,3 +243,22 @@ public class RegisterCamera : MonoBehaviour
 In this case, ```InfuseManager.RegisterService()``` and ```InfuseManager.UnregisterService()``` are distinctly different to ```InfuseManager.Register()``` and ```InfuseManager.Diffuse()``` in that they do not directly register / unregister the Camera object with Infuse, but they do add it to an ```InfuseServiceCollection<Camera>```, which allows another component to query for the collection of cameras as in the previous example.
 
 This example is implemented in full in ExampleScene3, which is bundled with the Infuse package in the Examples directory.
+
+
+## Debugging
+
+A common problem when using Infuse or any similar system is a missing or invalid dependency stopping a dependant service from starting. To aid with this type of issue, Infuse has a custom editor for InfuseScriptableContext objects, which can be found by highlighting the InfuseGlobalContext asset within Resources in the Infuse package. In this example it's displaying a context populated by running ExampleScene1;
+
+<img width="435" alt="ContextInspector1" src="https://github.com/user-attachments/assets/f5ecace6-b935-44b4-880d-06dea3d8ce97" />
+
+So let's delete ExampleServiceB in the scene hierarchy;
+
+<img width="435" alt="ContextInspector2" src="https://github.com/user-attachments/assets/0f838b80-a148-455e-9833-31a69d8739ab" />
+
+In the screenshot above, you'll see that the line ```Infuse.Examples.ExampleServiceB (0)``` indicates that there are no more active instances of ExampleServiceB, and just below it, the line ```Provides : Infuse.Examples.IExampleServiceB``` is now in red as it is no longer being provided.
+
+You'll also see that the line ```Infuse.Examples.ExampleServiceC (1)``` is in red. This is because as it requires IExampleServiceB (also shown in red just below), it's also no longer available.
+
+Finally, because ExampleServiceC also isn't available, the instances of ExampleClient aren't available either, as they also depend on ExampleServiceC.
+
+We can of course, add ExampleServiceB back into the scene hierarchy while we're still in play mode, which restores all the services back to their original available state.
