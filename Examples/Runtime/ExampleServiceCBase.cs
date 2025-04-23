@@ -10,7 +10,7 @@ namespace Infuse.Examples
             InfuseManager.Register(this);
         }
 
-        protected void OnInfuse(ExampleServiceA exampleServiceA)
+        protected void OnInfuse(IExampleServiceA exampleServiceA)
         {
             Debug.Log("ExampleServiceCBase.OnInfuse()");
         }

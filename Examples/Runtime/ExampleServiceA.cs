@@ -4,7 +4,7 @@ using Infuse;
 
 namespace Infuse.Examples
 {
-    public class ExampleServiceA : MonoBehaviour, InfuseAs<ExampleServiceA>
+    public class ExampleServiceA : MonoBehaviour, InfuseAs<IExampleServiceA>, IExampleServiceA
     {
         private void OnEnable()
         {

@@ -5,7 +5,7 @@ namespace Infuse.Examples
 {
     public class ExampleServiceC : ExampleServiceCBase, InfuseAs<ExampleServiceC>
     {
-        protected void OnInfuse(ExampleServiceA exampleServiceA, ExampleServiceB exampleServiceB)
+        protected void OnInfuse(IExampleServiceA exampleServiceA, IExampleServiceB exampleServiceB)
         {
             base.OnInfuse(exampleServiceA);
             
