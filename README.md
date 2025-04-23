@@ -1,8 +1,11 @@
-### Infuse
-A lightweight dependency injection system designed for Unity
+# Infuse
+A simple, lightweight dependency injection system designed around Unity.
+
 
 ## Introduction
-Most medium to large scale software projects are composed of multiple small components which are composed together to make larger components in order to produce sophisticated behaviours while managing the overall complexity of the project. In most development environments, there are well established practices and frameworks with which to accomplish this. However, Unity is not like most development environments.
+Most medium to large scale software projects are composed of multiple small components which are composed together to make larger components in order to produce sophisticated behaviours while managing the overall complexity of the project. In most development environments, there are well established practices and frameworks with which to accomplish this.
+
+However, Unity is not like most development environments.
 
 Generally speaking, it is common to develop components as MonoBehaviours within Unity. This is often desirable due to the fact that MonoBehaviour objects can easily be made to interact with other Unity components and show their state within the scene hierarchy, which makes for much easier project design and debugging.
 
@@ -21,7 +24,8 @@ There are numerous solutions to these problems;
  - Some components simply instantiate themselves as singleton objects, and while this is a relatively simple solution, it comes with all the usual issues associated with the use of singletons.
  
  Infuse takes a slightly different approach which is discussed below.
- 
+
+
 ## Design Goals
 Infuse is designed with a number of goals;
  - To be simple as possible - a simple API, clearly-defined behaviour, no intrusive editor extensions, and no dependencies other than Unity.
@@ -30,6 +34,58 @@ Infuse is designed with a number of goals;
  
  - Interoperate with Unity itself - adding or removing MonoBehaviours in play mode shouldn't guarantee a spew of errors in the console.
  
- - No requirement to use serialization to reference components - this avoids broken references between scenes/prefabs and keeps dependencies as implementation details, rather than properties that are exposed to the inspector.
+ - No requirement to use serialization to reference components - this avoids broken references between scenes/prefabs and keeps dependencies as hidden implementation details, rather than properties that are exposed to the inspector.
  
  - No requirements to use base classes - other existing frameworks already require that certain components extend existing base classes, so of course this would immediately introduce a potential incompatibility. This can potentially also force the use of base classes where a dependency on Infuse would otherwise be unnecessary.
+
+
+## Basic Usage Example
+
+```csharp
+using Infuse;
+
+public class ExampleService : MonoBehaviour, InfuseAs<ExampleService>
+{
+    private void Awake()
+    {
+        InfuseManager.Infuse(this);
+    }
+    
+    private void OnInfuse()
+    {
+        // Service starting
+    }
+    
+    private void OnDefuse()
+    {
+        // Service stopping
+    }
+}
+
+
+public class ExampleClient : MonoBehaviour
+{
+    private ExampleService _exampleService;
+        
+    private void Awake()
+    {
+        InfuseManager.Infuse(this);
+    }
+
+    // Called after ExampleService.OnInfuse()
+    private void OnInfuse(ExampleServiceC exampleServiceC)
+    {
+        _exampleService = exampleService;
+    }
+
+    // Called before ExampleService.OnDefuse()
+    private void OnDefuse()
+    {
+        _exampleService = null;
+    }
+}
+```
+
+You'll immediately notice that both these classes have two member functions - OnInfuse() and OnDefuse(). These are very similar to OnEnable() and OnDisable(), except that they're called when the dependencies of a component become available or unavailable.
+
+This means that we can have a complex hierarchy of interdependent components within a scene (or multiple scenes), or within prefabs, and they can be started when their dependencies become available, and stopped when their dependencies become unavailable. This behaviour works on-the-fly even when adding or removing components manually in play mode within the editor.
