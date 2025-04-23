@@ -33,10 +33,6 @@ namespace Infuse.Editor
             }
             else
             {
-                // var serviceLabel = new Label($"{InfuseEditorUtil.GetReadableTypeName(serviceType)} : {service}");
-                
-                // _root.Add(serviceLabel);
-
                 var textField = new TextField
                 {
                     label = InfuseEditorUtil.GetReadableTypeName(serviceType),
