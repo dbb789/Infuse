@@ -9,15 +9,20 @@ namespace Infuse.Collections
     {
         public List<Type> Dependencies => _dependencies;
 
-        private Action<object, InfuseServiceMap, InfuseTypeInfo, IInfuseCompletionHandler> _func;
-        private List<Type> _dependencies;
-        
+        public delegate void InfuseFunc(object instance,
+                                        InfuseServiceMap serviceMap,
+                                        InfuseTypeInfo typeInfo,
+                                        Action<InfuseTypeInfo, object> onInfuseCompleted);
+
+        private readonly InfuseFunc _func;
+        private readonly List<Type> _dependencies;
+
         public OnInfuseFunc() : this(null, null)
         {
             // ..
         }
 
-        public OnInfuseFunc(Action<object, InfuseServiceMap, InfuseTypeInfo, IInfuseCompletionHandler> func,
+        public OnInfuseFunc(InfuseFunc func,
                             IEnumerable<Type> dependencies)
         {
             _func = func;
@@ -27,15 +32,15 @@ namespace Infuse.Collections
         public void Invoke(object instance,
                            InfuseServiceMap serviceMap,
                            InfuseTypeInfo typeInfo,
-                           IInfuseCompletionHandler completionHandler)
+                           Action<InfuseTypeInfo, object> onInfuseCompleted)
         {
             if (_func != null)
             {
-                _func.Invoke(instance, serviceMap, typeInfo, completionHandler);
+                _func.Invoke(instance, serviceMap, typeInfo, onInfuseCompleted);
             }
             else
             {
-                completionHandler.OnInfuseCompleted(typeInfo, instance);
+                onInfuseCompleted?.Invoke(typeInfo, instance);
             }
         }
     }

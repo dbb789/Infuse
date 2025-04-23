@@ -6,13 +6,13 @@ namespace Infuse.Util
 {
     public static class InfuseServiceUtil
     {
-        public static bool TryGetServiceType(Type declaration, out Type serviceType)
+        public static bool TryGetServiceType(Type type, out Type serviceType)
         {
-            if (declaration.IsGenericType &&
-                declaration.GetGenericTypeDefinition() == typeof(InfuseService<>) &&
-                declaration.GenericTypeArguments.Length == 1)
+            if (type.IsGenericType &&
+                type.GetGenericTypeDefinition() == typeof(InfuseAs<>) &&
+                type.GenericTypeArguments.Length == 1)
             {
-                serviceType = declaration.GenericTypeArguments[0];
+                serviceType = type.GenericTypeArguments[0];
                 return true;
             }
 

@@ -2,9 +2,9 @@ using System;
 using UnityEngine;
 using Infuse;
 
-namespace InfuseExample
+namespace Infuse.Examples
 {
-    public class ExampleServiceA : MonoBehaviour, InfuseService<ExampleServiceA>
+    public class ExampleServiceA : MonoBehaviour, InfuseAs<ExampleServiceA>
     {
         private void OnEnable()
         {

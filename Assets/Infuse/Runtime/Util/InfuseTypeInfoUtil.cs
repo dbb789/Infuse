@@ -11,6 +11,7 @@ namespace Infuse.Util
 {
     public static class InfuseTypeInfoUtil
     {
+        // This is pretty heavyweight, but it's only called once per type as needed.
         public static InfuseTypeInfo CreateInfuseTypeInfo(Type type)
         {
             if (type == null)
@@ -163,12 +164,12 @@ namespace Infuse.Util
 
             var invokeFunc = invokeExpression.Compile();
 
-            return new OnInfuseFunc((instance, serviceMap, infuseType, completionHandler) =>
+            return new OnInfuseFunc((instance, serviceMap, infuseType, onInfuseCompleted) =>
             {
                 try
                 {
                      invokeFunc(instance, serviceMap);
-                     completionHandler.OnInfuseCompleted(infuseType, instance);
+                     onInfuseCompleted?.Invoke(infuseType, instance);
                 }
                 catch (Exception e)
                 {
@@ -199,12 +200,12 @@ namespace Infuse.Util
 
             var invokeFunc = invokeExpression.Compile();
 
-            return new OnInfuseFunc(async (instance, serviceMap, infuseType, completionHandler) =>
+            return new OnInfuseFunc(async (instance, serviceMap, infuseType, onInfuseCompleted) =>
             {
                 try
                 {
                     await invokeFunc.Invoke(instance, serviceMap);
-                    completionHandler.OnInfuseCompleted(infuseType, instance);
+                    onInfuseCompleted?.Invoke(infuseType, instance);
                 }
                 catch (Exception e)
                 {

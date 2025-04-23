@@ -2,7 +2,7 @@ using Infuse.Collections;
 
 namespace Infuse
 {
-    public interface InfuseService<TServiceType>
+    public interface InfuseAs<TServiceType>
         where TServiceType : class
     {
         // ...

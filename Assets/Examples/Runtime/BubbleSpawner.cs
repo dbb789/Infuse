@@ -1,7 +1,7 @@
 using UnityEngine;
 using Infuse;
 
-namespace InfuseExample
+namespace Infuse.Examples
 {
     public class BubbleSpawner : MonoBehaviour
     {

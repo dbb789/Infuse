@@ -2,7 +2,8 @@
     "name": "Infuse.Examples",
     "rootNamespace": "",
     "references": [
-        "GUID:2be2a18b98d408c4f990c8066667d1aa"
+        "GUID:2be2a18b98d408c4f990c8066667d1aa",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

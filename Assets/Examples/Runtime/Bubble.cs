@@ -1,9 +1,11 @@
 using UnityEngine;
 using Infuse;
 
-namespace InfuseExample
+namespace Infuse.Examples
 {
-    public class Bubble : MonoBehaviour, InfuseService<InfuseServiceCollection<Bubble>>
+    // Each Bubble will be added to a common InfuseServiceCollection<Bubble> as
+    // a result of calling Infuse() and Defuse() below.
+    public class Bubble : MonoBehaviour, InfuseAs<InfuseServiceCollection<Bubble>>
     {
         private SimplePool _parentPool;
         private Vector3 _velocity;
@@ -18,8 +20,11 @@ namespace InfuseExample
         {
             transform.position = Vector3.zero;
             _velocity = new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), 0);
-            _lifeTime = Time.time + Random.Range(0.5f, 1.5f);
+            _lifeTime = Time.time + Random.Range(2f, 3f);
 
+            // We're calling Defuse() ourselves here, so pass false as a second
+            // argument to disable automatically calling Defuse() on
+            // MonoBehaviour destroy.
             InfuseManager.Infuse(this, false);
         }
 

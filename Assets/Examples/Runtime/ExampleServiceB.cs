@@ -1,9 +1,9 @@
 using UnityEngine;
 using Infuse;
 
-namespace InfuseExample
+namespace Infuse.Examples
 {
-    public class ExampleServiceB : MonoBehaviour, InfuseService<ExampleServiceB>
+    public class ExampleServiceB : MonoBehaviour, InfuseAs<ExampleServiceB>
     {
         private void Awake()
         {

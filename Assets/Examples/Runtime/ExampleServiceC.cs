@@ -1,9 +1,9 @@
 using UnityEngine;
 using Infuse;
 
-namespace InfuseExample
+namespace Infuse.Examples
 {
-    public class ExampleServiceC : ExampleServiceCBase, InfuseService<ExampleServiceC>
+    public class ExampleServiceC : ExampleServiceCBase, InfuseAs<ExampleServiceC>
     {
         protected void OnInfuse(ExampleServiceA exampleServiceA, ExampleServiceB exampleServiceB)
         {

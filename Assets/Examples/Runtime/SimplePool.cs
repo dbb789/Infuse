@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Infuse;
 
-namespace InfuseExample
+namespace Infuse.Examples
 {
     // Very simple GameObject pool implementation for demonstration purposes.
     public abstract class SimplePool : MonoBehaviour

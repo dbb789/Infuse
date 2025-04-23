@@ -13,13 +13,13 @@ namespace Infuse.Collections
         public List<Type> ProvidedServices => _providedServices;
         public List<Type> RequiredServices => _requiredServices;
 
-        private Type _instanceType;
+        private readonly Type _instanceType;
         
-        private List<Type> _providedServices;
-        private List<Type> _requiredServices;
+        private readonly List<Type> _providedServices;
+        private readonly List<Type> _requiredServices;
 
-        private OnInfuseFunc _infuseFunc;
-        private OnDefuseFunc _defuseFunc;
+        private readonly OnInfuseFunc _infuseFunc;
+        private readonly OnDefuseFunc _defuseFunc;
         
         public InfuseTypeInfo(Type instanceType,
                               IEnumerable<Type> providedServices,
@@ -41,9 +41,9 @@ namespace Infuse.Collections
         
         public void Infuse(object instance,
                            InfuseServiceMap serviceMap,
-                           IInfuseCompletionHandler completionHandler)
+                           Action<InfuseTypeInfo, object> onInfuseCompleted)
         {
-            _infuseFunc.Invoke(instance, serviceMap, this, completionHandler);
+            _infuseFunc.Invoke(instance, serviceMap, this, onInfuseCompleted);
         }
 
         public void Defuse(object instance)

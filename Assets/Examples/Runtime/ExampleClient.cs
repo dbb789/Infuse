@@ -1,9 +1,9 @@
 using UnityEngine;
 using Infuse;
 
-namespace InfuseExample
+namespace Infuse.Examples
 {
-    public class ExampleClient : MonoBehaviour, InfuseService<InfuseServiceCollection<ExampleClient>>
+    public class ExampleClient : MonoBehaviour, InfuseAs<InfuseServiceCollection<ExampleClient>>
     {
         private ExampleServiceC _exampleServiceC;
         
