@@ -91,7 +91,7 @@ public class ExampleClient : MonoBehaviour
 }
 ```
 
-You'll immediately notice that both these classes have two member functions - OnInfuse() and OnDefuse(). These are very similar to ```OnEnable()``` and ```OnDisable()```, except that they're called when the dependencies of a component become available or unavailable.
+You'll immediately notice that both these classes have two member functions - ```OnInfuse()``` and ```OnDefuse()```. These are very similar to ```OnEnable()``` and ```OnDisable()```, except that they're called when the dependencies of a component become available or unavailable.
 
 This means that we can have a complex hierarchy of interdependant components within a scene (or multiple scenes) or within prefabs, and they will automatically be started when their dependencies become available, and stopped when their dependencies become unavailable. This behaviour works on-the-fly even when adding or removing components manually in play mode within the editor.
 
