@@ -8,7 +8,7 @@ namespace Infuse.Examples
     {
         private void OnEnable()
         {
-            InfuseManager.Register(this);
+            InfuseManager.Register(this, false);
         }
 
         private void OnDisable()
