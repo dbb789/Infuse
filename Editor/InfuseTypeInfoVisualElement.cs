@@ -6,7 +6,7 @@ namespace Infuse.Editor
 {
     public class InfuseTypeInfoVisualElement : VisualElement
     {
-        private Foldout _foldout;
+        private Label _label;
         private VisualElement _requiredServicesList;
         private VisualElement _providedServicesList;
         
@@ -14,21 +14,33 @@ namespace Infuse.Editor
         {
             var root = new VisualElement();
             
-            _foldout = new Foldout();
+            _label = new Label();
+
+            _label.style.unityFontStyleAndWeight = FontStyle.Bold;
             
+            root.Add(_label);
+
             _requiredServicesList = new Box();
             _providedServicesList = new Box();
             
-            _foldout.Add(_requiredServicesList);
-            _foldout.Add(_providedServicesList);
+            root.Add(_requiredServicesList);
+            root.Add(_providedServicesList);
 
-            root.Add(_foldout);
+            var spacer = new VisualElement();
+
+            spacer.style.height = 10;
+
+            root.Add(spacer);
+            
             Add(root);
         }
 
         public void SetContent(InfuseTypeInfo typeInfo, InfuseScriptableContext context)
         {
-            _foldout.text = InfuseEditorUtil.GetReadableTypeName(typeInfo.InstanceType);
+            int instanceCount = context.InstanceMap.GetInstanceSet(typeInfo.InstanceType).Count;
+            
+            _label.text = $"{InfuseEditorUtil.GetReadableTypeName(typeInfo.InstanceType)} ({instanceCount})";
+            _label.style.color = typeInfo.Resolved ? Color.green : Color.red;
             
             _requiredServicesList.Clear();
             
@@ -47,6 +59,8 @@ namespace Infuse.Editor
             foreach (var service in typeInfo.ProvidedServices)
             {
                 var serviceLabel = new Label($"Provides : {InfuseEditorUtil.GetReadableTypeName(service)}");
+
+                serviceLabel.style.color = (instanceCount > 0)  ? Color.green : Color.red;
                 
                 _providedServicesList.Add(serviceLabel);
             }

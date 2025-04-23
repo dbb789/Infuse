@@ -62,5 +62,10 @@ namespace Infuse
                 Debug.LogException(e);
             }
         }
+
+        public override string ToString()
+        {
+            return string.Join(", ", _services);
+        }
     }
 }

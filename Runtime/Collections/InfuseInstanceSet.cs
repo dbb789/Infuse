@@ -18,7 +18,8 @@ namespace Infuse.Collections
             public bool MoveNext() => _enumerator.MoveNext();
             public void Dispose() => _enumerator.Dispose();
         }
-        
+
+        public IEnumerable<object> Instances => _instanceSet.Keys;
         public int Count => _instanceSet.Count;
         
         private Dictionary<object, IDisposable> _instanceSet;

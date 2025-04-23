@@ -32,9 +32,13 @@ namespace Infuse.Editor
             }
             else
             {
-                var instanceLabel = new Label($"{instance}");
-                
-                _root.Add(instanceLabel);
+                var textField = new TextField
+                {
+                    label = "",
+                    value = instance.ToString()
+                };
+
+                _root.Add(textField);
             }
         }
     }
