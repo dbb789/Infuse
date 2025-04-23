@@ -9,14 +9,14 @@ namespace Infuse
     {
         private static readonly InfuseContext _context = GetGlobalContext();
         
-        public static void Infuse(object instance, bool defuseOnDestroy = true)
+        public static void Register(object instance, bool unregisterOnDestroy = true)
         {
-            _context.Infuse(instance, defuseOnDestroy);
+            _context.Register(instance, unregisterOnDestroy);
         }
         
-        public static void Defuse(object instance)
+        public static void Unregister(object instance)
         {
-            _context.Defuse(instance);
+            _context.Register(instance);
         }
         
         public static void RegisterService<TServiceType>(object instance) where TServiceType : class

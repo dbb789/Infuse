@@ -8,12 +8,12 @@ namespace Infuse.Examples
     {
         private void OnEnable()
         {
-            InfuseManager.Infuse(this);
+            InfuseManager.Register(this);
         }
 
         private void OnDisable()
         {
-            InfuseManager.Defuse(this);
+            InfuseManager.Unregister(this);
         }
 
         private void OnInfuse()

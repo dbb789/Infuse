@@ -14,14 +14,14 @@ namespace Infuse
         
         private InfuseBaseContext _baseContext = new();
 
-        public void Infuse(object instance, bool defuseOnDestroy = true)
+        public void Register(object instance, bool unregisterOnDestroy = true)
         {
-            _baseContext.Infuse(instance, defuseOnDestroy);
+            _baseContext.Register(instance, unregisterOnDestroy);
         }
         
-        public void Defuse(object instance)
+        public void Unregister(object instance)
         {
-            _baseContext.Defuse(instance);
+            _baseContext.Unregister(instance);
         }
 
         public void RegisterService<TServiceType>(object instance) where TServiceType : class

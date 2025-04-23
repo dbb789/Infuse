@@ -32,12 +32,12 @@ namespace Infuse.Examples
             // We're calling Defuse() ourselves here, so pass false as a second
             // argument to disable automatically calling Defuse() on
             // MonoBehaviour destroy.
-            InfuseManager.Infuse(this, false);
+            InfuseManager.Register(this, false);
         }
 
         private void OnDisable()
         {
-            InfuseManager.Defuse(this);
+            InfuseManager.Unregister(this);
         }
 
         protected abstract GameObject CreateInstance(GameObject prefab, Transform parent);

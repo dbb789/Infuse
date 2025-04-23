@@ -13,7 +13,7 @@ namespace Infuse.Examples
         
         private void Awake()
         {
-            InfuseManager.Infuse(this);
+            InfuseManager.Register(this);
         }
 
         public void OnInfuse(InfuseServiceCollection<Bubble> bubbleCollection)

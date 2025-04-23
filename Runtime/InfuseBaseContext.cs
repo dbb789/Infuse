@@ -23,11 +23,11 @@ namespace Infuse
             _typeMap = new();
             _serviceMap = new();
             _instanceMap = new();
-            _destroyCancellationCallback = (instance) => Defuse(instance);
+            _destroyCancellationCallback = (instance) => Unregister(instance);
             _onInfuseCompleted = OnInfuseCompleted;
         }
         
-        public void Infuse(object instance, bool defuseOnDestroy = true)
+        public void Register(object instance, bool unregisterOnDestroy = true)
         {
             if (instance == null)
             {
@@ -38,13 +38,13 @@ namespace Infuse
             
             if (_instanceMap.Contains(type, instance))
             {
-                Debug.LogWarning($"Instance of type {type} is already infused.");
+                Debug.LogWarning($"Instance of type {type} is already registered.");
                 return;
             }
 
             IDisposable disposable = null;
             
-            if (defuseOnDestroy && instance is MonoBehaviour monoBehaviour)
+            if (unregisterOnDestroy && instance is MonoBehaviour monoBehaviour)
             {
                 disposable = monoBehaviour.destroyCancellationToken.Register(_destroyCancellationCallback, instance);
             }
@@ -59,7 +59,7 @@ namespace Infuse
             }
         }
 
-        public void Defuse(object instance)
+        public void Unregister(object instance)
         {
             if (instance == null)
             {
@@ -70,7 +70,7 @@ namespace Infuse
             
             if (!_instanceMap.Contains(type, instance))
             {
-                Debug.LogWarning($"Instance of type {type} is not infused.");
+                Debug.LogWarning($"Instance of type {type} is not registered.");
                 return;
             }
 

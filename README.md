@@ -47,8 +47,8 @@ Infuse is at it's core a very simple dependency injection system - that is, it s
 
 However unlike a 'traditional' dependency injection system, Infuse has to handle the scenarios where dependencies can randomly come in and out of existence within the Unity scene hierarchy. Given that this isn't the behaviour we'd normally expect to be able to handle with a regular constructor/destructor pair, new terminology is assigned to these events;
 
-- OnInfuse - This is when an object can be started as all of it's required dependencies have come available.
-- OnDefuse - This is when an object has to be stopped as one or more of it's required dependencies are no longer available.
+- Infuse - This is when an object can be started as all of it's required dependencies have come available.
+- Defuse - This is when an object has to be stopped as one or more of it's required dependencies are no longer available.
 
 Given that it's quite common for an object to be destroyed or deactivated and then later instantiated or activated at some point in the future, a dependant object can be restarted as a result of ```OnDefuse()``` then ```OnInfuse()``` calls. This gives us the option to modify a scene at will without risking throwing exceptions as a result of dangling and/or invalid references.
 
@@ -62,8 +62,8 @@ namespace Infuse
 {
     public interface InfuseContext
     {
-        void Infuse(object instance, bool defuseOnDestroy = true);
-        void Defuse(object instance);
+        void Register(object instance, bool defuseOnDestroy = true);
+        void Unregister(object instance);
 
         void RegisterService<TServiceType>(object instance) where TServiceType : class;
         void UnregisterService<TServiceType>(object instance) where TServiceType : class;
@@ -86,10 +86,10 @@ public class ExampleService : MonoBehaviour, InfuseAs<ExampleService>
     private void Awake()
     {
         // Register this object with the default context.
-        InfuseManager.Infuse(this);
+        InfuseManager.Register(this);
     }
     
-    // As this object has no dependencies, this method is immediately invoked via InfuseManager.Infuse(this).
+    // As this object has no dependencies, this method is immediately invoked via InfuseManager.Register(this).
     private void OnInfuse()
     {
         // Service starting.
@@ -110,7 +110,7 @@ public class ExampleClient : MonoBehaviour
     private void Awake()
     {
         // Register this object with the default context.
-        InfuseManager.Infuse(this);
+        InfuseManager.Register(this);
     }
 
     // Called after ExampleService.OnInfuse() due to the dependency declared as an argument in the method.
@@ -131,9 +131,9 @@ You'll immediately notice that both these classes have two member functions - ``
 
 This means that we can have a complex hierarchy of interdependant components within a scene (or multiple scenes) or within prefabs, and they will automatically be started when their dependencies become available, and stopped when their dependencies become unavailable. This behaviour works on-the-fly even when adding or removing components manually in play mode within the editor.
 
-```InfuseManager.Infuse(this)``` simply registers an object with the built-in default Infuse Context object. It can be invoked at any time, and an object can be unregistered with the ```InfuseManager.Defuse(...)``` call.
+```InfuseManager.Register(this)``` simply registers an object with the built-in default Infuse Context object. It can be invoked at any time, and an object can be unregistered with the ```InfuseManager.Unregister(...)``` call.
 
-In addition, the Infuse Context automatically unregisters a MonoBehaviour when it's destroyCancellationToken is triggered. This means that a MonoBehaviour object will automatically be unregistered when it is destroyed and calling ```InfuseManager.Defuse(this)``` in ```OnDestroy()``` is unnecessary. However this behaviour can be disabled if necessary.
+In addition, the Infuse Context automatically unregisters a MonoBehaviour when it's destroyCancellationToken is triggered. This means that a MonoBehaviour object will automatically be unregistered when it is destroyed and calling ```InfuseManager.Unregister(this)``` in ```OnDestroy()``` is unnecessary. However this behaviour can be disabled if necessary.
 
 
 ## Unity 6 Awaitable Support
@@ -148,10 +148,10 @@ public class ExampleService : MonoBehaviour, InfuseAs<ExampleService>
     private void Awake()
     {
         // Register this object with the default context.
-        InfuseManager.Infuse(this);
+        InfuseManager.Register(this);
     }
     
-    // As this object has no dependencies, this method is immediately invoked via InfuseManager.Infuse(this).
+    // As this object has no dependencies, this method is immediately invoked via InfuseManager.Register(this).
     private async Awaitable OnInfuse()
     {
         // Service starting.
@@ -182,7 +182,7 @@ public class ExampleService : MonoBehaviour, InfuseAs<InfuseServiceCollection<Ex
 {
     private void Awake()
     {
-        InfuseManager.Infuse(this);
+        InfuseManager.Register(this);
     }
 }
 ```
@@ -194,7 +194,7 @@ public class ExampleClient : MonoBehaviour
 {
     private void Awake()
     {
-        InfuseManager.Infuse(this);
+        InfuseManager.Register(this);
     }
 
     private void OnInfuse(InfuseServiceCollection<ExampleService> exampleServiceCollection)
@@ -234,6 +234,6 @@ public class RegisterCamera : MonoBehaviour
 }
 ```
 
-In this case, ```InfuseManager.RegisterService()``` and ```InfuseManager.UnregisterService()``` are distinctly different to ```InfuseManager.Infuse()``` and ```InfuseManager.Diffuse()``` in that they do not directly register / unregister the Camera object with Infuse, but they do add it to an ```InfuseServiceCollection<Camera>```, which allows another component to query for the collection of cameras as in the previous example.
+In this case, ```InfuseManager.RegisterService()``` and ```InfuseManager.UnregisterService()``` are distinctly different to ```InfuseManager.Register()``` and ```InfuseManager.Diffuse()``` in that they do not directly register / unregister the Camera object with Infuse, but they do add it to an ```InfuseServiceCollection<Camera>```, which allows another component to query for the collection of cameras as in the previous example.
 
 This example is implemented in full in ExampleScene3, which is bundled with the Infuse package in the Examples directory.
