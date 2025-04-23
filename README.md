@@ -41,6 +41,18 @@ Infuse is designed with a number of goals;
  - No requirement to use base classes - other existing frameworks already require that certain components extend base classes, so this avoids a potential incompatibility. This also avoids forcing the use of base classes where a dependency on Infuse would otherwise be unnecessary.
 
 
+## Implementation
+
+Infuse is at it's core a very simple dependency injection system - that is, it stores a set of registered services within a container/context, and passes these services to components that require them.
+
+However unlike a 'traditional' dependency injection system, Infuse has to handle the scenarios where dependencies can randomly come in and out of existence within the Unity scene hierarchy. Given that this isn't the behaviour we'd normally expect to be able to handle with a regular constructor/destructor pair, new terminology is assigned to these events;
+
+- OnInfuse - This is when an object can be started as all of it's required dependencies have come available.
+- OnDefuse - This is when an object has to be stopped as one or more of it's required dependencies are no longer available.
+
+Given that it's quite common for an object to be destroyed or deactivated and then later instantiated or activated at some point in the future, a dependant object can be restarted as a result of ```OnDefuse()``` then ```OnInfuse()``` calls. This gives us the option to modify a scene at will without risking throwing exceptions as a result of dangling and/or invalid references.
+
+
 ## Basic Usage Example
 
 ```csharp
