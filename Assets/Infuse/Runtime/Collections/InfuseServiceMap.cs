@@ -19,42 +19,93 @@ namespace Infuse.Collections
 
         public void Register(Type type, object instance)
         {
-            if (_serviceMap.ContainsKey(type))
+            if (type.IsAssignableFrom(instance.GetType()))
             {
-                throw new InfuseException($"Service of type {type} is already registered.");
-            }
+                if (_serviceMap.ContainsKey(type))
+                {
+                    throw new InfuseException($"Service of type {type} is already registered.");
+                }
 
-            if (!type.IsAssignableFrom(instance.GetType()))
+                Debug.Log($"Infuse: Registering service of type {type}.");
+                _serviceMap.Add(type, instance);
+            }
+            else if (typeof(InfuseServiceContainer).IsAssignableFrom(type))
+            {
+                InfuseServiceContainer container;
+                bool toAdd = false;
+
+                if (_serviceMap.TryGetValue(type, out var existing))
+                {
+                    container = (InfuseServiceContainer)existing;
+                }
+                else
+                {
+                    container = (InfuseServiceContainer)Activator.CreateInstance(type);
+                    toAdd = true;
+                }
+
+                container.Register(instance);
+
+                // Only add the new container if registration completed without
+                // throwing and the container is confirmed to be populated.
+                if (toAdd && container.Populated)
+                {
+                    _serviceMap.Add(type, container);
+                }
+            }
+            else
             {
                 throw new InfuseException($"Type {type} is not assignable from {instance.GetType()}.");
             }
-            
-            Debug.Log($"Infuse: Registering service of type {type}.");
-            _serviceMap.Add(type, instance);
         }
         
         public void Unregister(Type type, object instance)
         {
-            if (!_serviceMap.TryGetValue(type, out var service))
+            if (type.IsAssignableFrom(instance.GetType()))
             {
-                throw new InfuseException($"Service of type {type} is not registered.");
+                if (!_serviceMap.TryGetValue(type, out var service))
+                {
+                    throw new InfuseException($"Service of type {type} is not registered.");
+                }
+                
+                if (service != instance)
+                {
+                    throw new InfuseException($"Service of type {type} is not the same instance.");
+                }
+                
+                Debug.Log($"Infuse: Unregistering service of type {type}.");
+                _serviceMap.Remove(type);
             }
-
-            if (service != instance)
+            else if (typeof(InfuseServiceContainer).IsAssignableFrom(type))
             {
-                throw new InfuseException($"Service of type {type} is not the same instance.");
-            }
+                if (_serviceMap.TryGetValue(type, out var existing))
+                {
+                    var container = (InfuseServiceContainer)existing;
+                    
+                    container.Unregister(instance);
 
-            Debug.Log($"Infuse: Unregistering service of type {type}.");
-            _serviceMap.Remove(type);
+                    // Remove unpopulated container.
+                    if (!container.Populated)
+                    {
+                        _serviceMap.Remove(type);
+                    }
+                }
+                else
+                {
+                    throw new InfuseException($"Service of type {type} is not registered.");
+                }
+            }
+            else
+            {
+                throw new InfuseException($"Type {type} is not assignable from {instance.GetType()}.");
+            }
         }
 
         public bool ContainsAll(List<Type> requiredServices)
         {
             foreach (var type in requiredServices)
             {
-                if (!_serviceMap.ContainsKey(type) &&
-                    !TryCreateTransientType(type, out var _))
+                if (!_serviceMap.ContainsKey(type))
                 {
                     return false;
                 }
@@ -70,30 +121,7 @@ namespace Infuse.Collections
                 return instance;
             }
 
-            if (TryCreateTransientType(type, out var transientType))
-            {
-                return transientType;
-            }
-
             throw new InfuseException($"Service of type {type} is not registered.");
-        }
-
-        private bool TryCreateTransientType(Type type, out object transientType)
-        {
-            if (!InfuseServiceUtil.IsTransientType(type))
-            {
-                transientType = default;
-                
-                return false;
-            }
-
-            if (!_serviceMap.TryGetValue(type, out transientType))
-            {
-                transientType = Activator.CreateInstance(type);
-                _serviceMap.Add(type, transientType);
-            }
-            
-            return true;
         }
     }
 }

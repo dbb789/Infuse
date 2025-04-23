@@ -5,7 +5,7 @@ namespace InfuseExample
 {
     public class BubbleSpawner : MonoBehaviour
     {
-        private BubblePool _bubblePool;
+        private InfuseServiceStack<BubblePool> _bubblePool;
         private float _nextSpawnTime;
         
         private void Awake()
@@ -23,8 +23,10 @@ namespace InfuseExample
             }
         }
 
-        public void OnInfuse(BubblePool bubblePool)
+        public void OnInfuse(InfuseServiceStack<BubblePool> bubblePool)
         {
+            Debug.Log("BubbleSpawner.OnInfuse()", gameObject);
+            
             _bubblePool = bubblePool;
             _nextSpawnTime = Time.time;
             enabled = true;
@@ -32,6 +34,8 @@ namespace InfuseExample
 
         private void OnDefuse()
         {
+            Debug.Log("BubbleSpawner.OnDefuse()", gameObject);
+            
             _bubblePool = null;
             enabled = false;
         }
@@ -44,7 +48,7 @@ namespace InfuseExample
             }
             
             _nextSpawnTime = Time.time + Random.Range(0.25f, 0.5f);
-            _bubblePool.Get();
+            _bubblePool.Current.Get();
         }
     }
 }

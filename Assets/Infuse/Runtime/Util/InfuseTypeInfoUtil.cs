@@ -25,7 +25,8 @@ namespace Infuse.Util
             {
                 if (InfuseServiceUtil.TryGetServiceType(interfaceType, out var serviceType))
                 {
-                    if (serviceType.IsAssignableFrom(type))
+                    if (serviceType.IsAssignableFrom(type) ||
+                        typeof(InfuseServiceContainer).IsAssignableFrom(serviceType))
                     {
                         provides.Add(serviceType);
                     }
@@ -39,6 +40,11 @@ namespace Infuse.Util
                 }
             }
 
+            // Recursively look down the inheritance hierarchy to find the first
+            // valid instances of OnInfuse() and OnDefuse(). This should result
+            // in a behaviour very similar to how Unity finds Awake(), Start()
+            // etc. If we find invalid OnInfuse()/OnDefuse() methods, we'll
+            // ignore them and spew into the error log (see below).
             MethodInfo infuseMethod = null;
             MethodInfo defuseMethod = null;
             var baseType = type;
@@ -59,11 +65,15 @@ namespace Infuse.Util
                 
                 baseType = baseType.BaseType;
             }
-            
+
+            var onInfuseFunc = CreateOnInfuseFunc(type, infuseMethod);
+            var onDefuseFunc = CreateOnDefuseFunc(type, defuseMethod);
+
             return new InfuseTypeInfo(type,
                                       provides.AsEnumerable<Type>(),
-                                      CreateOnInfuseFunc(type, infuseMethod),
-                                      CreateOnDefuseFunc(type, defuseMethod));
+                                      onInfuseFunc.Dependencies,
+                                      onInfuseFunc,
+                                      onDefuseFunc);
         }
 
         private static void TryGetInfuseMethodsFromType(Type type,
@@ -137,7 +147,7 @@ namespace Infuse.Util
 
             // Builds a lambda expression that looks something like;
             // (instance, serviceMap) => ((Type)instance).OnInfuse((Type1)serviceMap.GetService(typeof(Type1)),
-            //                                                    (Type2)serviceMap.GetService(typeof(Type2)))
+            //                                                     (Type2)serviceMap.GetService(typeof(Type2)))
             
             var instanceParameter = Expression.Parameter(typeof(object), "instance");
             var serviceMapParameter = Expression.Parameter(typeof(InfuseServiceMap), "serviceMap");
@@ -162,7 +172,8 @@ namespace Infuse.Util
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError($"Infuse: Exception in OnInfuseFunc: {e}");
+                    Debug.LogError($"Infuse: Exception in OnInfuseFunc: {e.Message}");
+                    Debug.LogException(e);
                 }
             }, dependencies);
         }
@@ -197,7 +208,8 @@ namespace Infuse.Util
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError($"Infuse: Exception in OnInfuseFunc: {e}");
+                    Debug.LogError($"Infuse: Exception in OnInfuseFunc: {e.Message}");
+                    Debug.LogException(e);
                 }
             }, dependencies);
         }
@@ -208,7 +220,9 @@ namespace Infuse.Util
             {
                 return new OnDefuseFunc();
             }
-            
+
+            // Building a lambda expression here should be a little bit faster
+            // and also seems to save us an unnecessary heap allocation.
             var instanceParameter = Expression.Parameter(typeof(object), "instance");
             var invokeExpression = Expression.Lambda<Action<object>>(
                 Expression.Call(Expression.Convert(instanceParameter, type), method),
@@ -218,7 +232,15 @@ namespace Infuse.Util
             
             return new OnDefuseFunc((instance) =>
             {
-                invokeFunc(instance);
+                try
+                {
+                    invokeFunc(instance);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"Infuse: Exception in OnDefuseFunc: {e.Message}");
+                    Debug.LogException(e);
+                }
             });                
         }
         

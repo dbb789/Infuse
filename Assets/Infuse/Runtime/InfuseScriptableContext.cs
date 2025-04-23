@@ -29,11 +29,11 @@ namespace Infuse
         public InfuseInstanceMap InstanceMap => _instanceMap;
         public InfuseServiceMap ServiceMap => _serviceMap;
         
-        private InfuseTypeInfoMap _typeMap;
-        private InfuseServiceMap _serviceMap;
-        private InfuseInstanceMap _instanceMap;
-        private InfuseContextCompletionHandler _completionHandler;
-        private Action<object> _destroyCancellationCallback;
+        private readonly InfuseTypeInfoMap _typeMap;
+        private readonly InfuseServiceMap _serviceMap;
+        private readonly InfuseInstanceMap _instanceMap;
+        private readonly InfuseContextCompletionHandler _completionHandler;
+        private readonly Action<object> _destroyCancellationCallback;
         
         public InfuseScriptableContext()
         {

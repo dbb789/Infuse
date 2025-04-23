@@ -17,12 +17,13 @@ namespace Infuse.Collections
         
         private List<Type> _providedServices;
         private List<Type> _requiredServices;
-        
+
         private OnInfuseFunc _infuseFunc;
         private OnDefuseFunc _defuseFunc;
         
         public InfuseTypeInfo(Type instanceType,
                               IEnumerable<Type> providedServices,
+                              IEnumerable<Type> requiredServices,
                               OnInfuseFunc infuseFunc,
                               OnDefuseFunc defuseFunc)
         {
@@ -32,10 +33,10 @@ namespace Infuse.Collections
             _defuseFunc = defuseFunc ?? throw new ArgumentNullException(nameof(defuseFunc));
             
             _providedServices = new List<Type>(providedServices ?? Enumerable.Empty<Type>());
-            _requiredServices = new List<Type>(_infuseFunc.Dependencies);
+            _requiredServices = new List<Type>(requiredServices ?? Enumerable.Empty<Type>());
 
-            // Any type with no dependencies is always resolved by definition.
-            Resolved = (_requiredServices.Count == 0);
+            // The context is always responsible for resolving the type, even if it's got no dependencie.
+            Resolved = false;
         }
         
         public void Infuse(object instance,

@@ -4,7 +4,8 @@ using Infuse;
 
 namespace InfuseExample
 {
-    public class SimplePool : MonoBehaviour
+    // Very simple GameObject pool implementation for demonstration purposes.
+    public abstract class SimplePool : MonoBehaviour
     {
         [SerializeField]
         private GameObject _prefab;
@@ -12,28 +13,34 @@ namespace InfuseExample
         [SerializeField]
         private int _initialSize = 10;
 
-        private Stack<GameObject> _pool;
+        private Stack<GameObject> _pool = new();
 
         private void Awake()
         {
-            InfuseManager.Infuse(this);
-        }
-
-        private async Awaitable OnInfuse()
-        {
-            Debug.Log("SimplePool.OnInfuse()", gameObject);
-            
-            _pool = new Stack<GameObject>();
-
-            var goArray = await InstantiateAsync(_prefab, _initialSize, transform);
-
-            foreach (var go in goArray)
+            for (int i = 0; i < _initialSize; i++)
             {
+                var go = CreateInstance(_prefab, transform);
+                
                 go.SetActive(false);
                 
                 _pool.Push(go);
             }
         }
+        
+        private void OnEnable()
+        {
+            // We're calling Defuse() ourselves here, so pass false as a second
+            // argument to disable automatically calling Defuse() on
+            // MonoBehaviour destroy.
+            InfuseManager.Infuse(this, false);
+        }
+
+        private void OnDisable()
+        {
+            InfuseManager.Defuse(this);
+        }
+
+        protected abstract GameObject CreateInstance(GameObject prefab, Transform parent);
 
         public GameObject Get()
         {
@@ -47,7 +54,7 @@ namespace InfuseExample
             }
             else
             {
-                return Instantiate(_prefab, transform);
+                return CreateInstance(_prefab, transform);
             }
         }
 

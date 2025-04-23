@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 using Infuse.Collections;
 
 namespace Infuse
 {
-    public class InfuseServiceCollection<TServiceType> : InfuseTransient
+    public class InfuseServiceCollection<TServiceType> : InfuseServiceContainer<TServiceType>
+        where TServiceType : class
     {
+        public override bool Populated => _services.Count > 0;
+        
         public IEnumerable<TServiceType> Services => _services;
         public int Count => _services.Count;
         
@@ -19,18 +23,44 @@ namespace Infuse
             _services = new HashSet<TServiceType>();
         }
         
-        public void Add(TServiceType instance)
+        public override void Register(TServiceType instance)
         {
             _services.Add(instance);
 
-            OnServiceAdded?.Invoke(instance);
+            InvokeServiceAdded(instance);
         }
 
-        public void Remove(TServiceType instance)
+        public override void Unregister(TServiceType instance)
         {
             _services.Remove(instance);
             
-            OnServiceRemoved?.Invoke(instance);
+            InvokeServiceRemoved(instance);
+        }
+        
+        // Catch exceptions here so that a badly behaved subscriber doesn't
+        // break everything else.
+        private void InvokeServiceAdded(TServiceType instance)
+        {
+            try
+            {
+                OnServiceAdded?.Invoke(instance);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+        }
+
+        private void InvokeServiceRemoved(TServiceType instance)
+        {
+            try
+            {
+                OnServiceRemoved?.Invoke(instance);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
         }
     }
 }
