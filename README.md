@@ -42,12 +42,14 @@ Infuse is designed with a number of goals;
 ## Basic Usage Example
 
 ```csharp
+using UnityEngine;
 using Infuse;
 
 public class ExampleService : MonoBehaviour, InfuseAs<ExampleService>
 {
     private void Awake()
     {
+        // Register this object with the default context.
         InfuseManager.Infuse(this);
     }
     
@@ -69,6 +71,7 @@ public class ExampleClient : MonoBehaviour
         
     private void Awake()
     {
+        // Register this object with the default context.
         InfuseManager.Infuse(this);
     }
 
@@ -88,4 +91,8 @@ public class ExampleClient : MonoBehaviour
 
 You'll immediately notice that both these classes have two member functions - OnInfuse() and OnDefuse(). These are very similar to OnEnable() and OnDisable(), except that they're called when the dependencies of a component become available or unavailable.
 
-This means that we can have a complex hierarchy of interdependent components within a scene (or multiple scenes), or within prefabs, and they can be started when their dependencies become available, and stopped when their dependencies become unavailable. This behaviour works on-the-fly even when adding or removing components manually in play mode within the editor.
+This means that we can have a complex hierarchy of interdependent components within a scene (or multiple scenes) or within prefabs, and they will automatically be started when their dependencies become available, and stopped when their dependencies become unavailable. This behaviour works on-the-fly even when adding or removing components manually in play mode within the editor.
+
+InfuseManager.Infuse(this) simply registers an object with the built-in default Infuse Context object. It can be invoked at any time, and an object can be unregistered with the InfuseManager.Defuse(...) call.
+
+In addition, the Infuse Context automatically unregisters a MonoBehaviour when it's destroyCancellationToken is triggered. This means that a MonoBehaviour object will automatically be unregistered when it is destroyed and calling InfuseManager.Defuse(this) in OnDestroy() is unnecessary. However this behaviour can be disabled if necessary.
