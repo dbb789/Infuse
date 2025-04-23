@@ -179,3 +179,28 @@ public class ExampleClient : MonoBehaviour
 An ```InfuseServiceCollection``` becomes available as a dependency (calling ```ExampleClient.OnInfuse()```) as soon as it contains one or more instances. It becomes unavailable (calling ```ExampleClient.OnDefuse()```) when it is empty.
 
 This is only one example of a Service Container, and Infuse also comes with an ```InfuseServiceStack``` which allows one service to override another. You can also write your own classes which should inherit from ```ServiceContainer```.
+
+
+## Registering External Components
+
+Sometimes it's neither possible or desirable to extend some existing components that are outside of a project in order to register them with Infuse. However we can easily register them manually as in this example;
+
+```csharp
+[RequireComponent(typeof(Camera))]
+public class RegisterCamera : MonoBehaviour
+{
+    private void OnEnable()
+    {
+        InfuseManager.RegisterService<InfuseServiceCollection<Camera>>(GetComponent<Camera>());
+    }
+
+    private void OnDisable()
+    {
+        InfuseManager.UnregisterService<InfuseServiceCollection<Camera>>(GetComponent<Camera>());
+    }
+}
+```
+
+In this case, ```InfuseManager.RegisterService()``` and ```InfuseManager.UnregisterService()``` are distinctly different to ```InfuseManager.Infuse()``` and ```InfuseManager.Diffuse()``` in that they do not directly register / unregister the Camera object with Infuse, but they do add it to an ```InfuseServiceCollection<Camera>```, which allows another component to query for the collection of cameras as in the previous example.
+
+This example is implemented in full in ExampleScene3, which is bundled with the Infuse package in the Examples directory.
