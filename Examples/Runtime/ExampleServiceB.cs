@@ -3,7 +3,7 @@ using Infuse;
 
 namespace Infuse.Examples
 {
-    public class ExampleServiceB : MonoBehaviour, InfuseAs<IExampleServiceB>,IExampleServiceB
+    public class ExampleServiceB : MonoBehaviour, IExampleServiceB, InfuseAs<IExampleServiceB>
     {
         private void Awake()
         {

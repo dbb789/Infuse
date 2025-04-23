@@ -80,8 +80,14 @@ Given that the vast majority of projects only require one context, a global cont
 using UnityEngine;
 using Infuse;
 
-// The InfuseAs<> declaration ensures that this service will be made available as ExampleService after OnInfuse().
-public class ExampleService : MonoBehaviour, InfuseAs<ExampleService>
+public interface IExampleService
+{
+    // Exposed interface to ExampleService would be declared here.
+}
+
+// The InfuseAs<> declaration ensures that this object will be made available as IExampleService after OnInfuse().
+// You could of course simply declare this object as itself using InfuseAs<ExampleService>.
+public class ExampleService : MonoBehaviour, IExampleService, InfuseAs<IExampleService>
 {
     private void Awake()
     {
@@ -105,7 +111,7 @@ public class ExampleService : MonoBehaviour, InfuseAs<ExampleService>
 
 public class ExampleClient : MonoBehaviour
 {
-    private ExampleService _exampleService;
+    private IExampleService _exampleService;
         
     private void Awake()
     {
@@ -114,7 +120,7 @@ public class ExampleClient : MonoBehaviour
     }
 
     // Called after ExampleService.OnInfuse() due to the dependency declared as an argument in the method.
-    private void OnInfuse(ExampleService exampleService)
+    private void OnInfuse(IExampleService exampleService)
     {
         _exampleService = exampleService;
     }
