@@ -1,5 +1,7 @@
-# Infuse
+# Infuse v0.0.1
 A simple, lightweight dependency injection system designed around Unity.
+
+Note that this project is currently barely in an alpha state, so if it blows up your computer, deletes all your git repositories, or gives your cat explosive diarrhea, that's on you.
 
 
 ## Introduction
@@ -101,7 +103,7 @@ This means that we can have a complex hierarchy of interdependant components wit
 In addition, the Infuse Context automatically unregisters a MonoBehaviour when it's destroyCancellationToken is triggered. This means that a MonoBehaviour object will automatically be unregistered when it is destroyed and calling ```InfuseManager.Defuse(this)``` in ```OnDestroy()``` is unnecessary. However this behaviour can be disabled if necessary.
 
 
-## Unity 6 Awaitable Support Example
+## Unity 6 Awaitable Support
 
 ```csharp
 using UnityEngine;
@@ -123,12 +125,6 @@ public class ExampleService : MonoBehaviour, InfuseAs<ExampleService>
         await InitializeAsync();
     }
     
-    // This method will be called automatically when this object is destroyed.
-    private void OnDefuse()
-    {
-        // Service stopping
-    }
-    
     private async Awaitable InitializeAsync()
     {
         await Awaitable.NextFrameAsync();
@@ -138,4 +134,48 @@ public class ExampleService : MonoBehaviour, InfuseAs<ExampleService>
 }
 ```
 
-This is identical to the example above, except the ```OnInfuse()``` function is asynchronous and returns an Awaitable object as provided by Unity 6. This means that a service can have a heavyweight initialisation function which takes multiple frames to complete, and it's dependencies will wait until it has been fully initialised before their ```OnInfuse()``` methods are called.
+This is similar to the example above, except the ```OnInfuse()``` function is asynchronous and returns an Awaitable object as provided by Unity 6. This means that a service can have a heavyweight initialisation function which takes multiple frames to complete, and it's dependencies will wait until it has been fully initialised before their ```OnInfuse()``` methods are called.
+
+
+## Multiple Service Registration
+
+Sometimes it can become necessary for multiple instances of the same class of service to be registered at one time. By default, this obviously isn't going to work because ```OnInfuse()``` recognises services by their class type, so only one instance of any given class can reliably be provided.
+
+However, Infuse provides a component called a Service Container, which allows a service to add itself to a container of multiple services, rather than presenting itself as one and only one instance. In order to enable this functionality, we can use the following declaration;
+
+```csharp
+// After OnInfuse() completes, this service will be added to an InfuseServiceCollection<ExampleService>.
+public class ExampleService : MonoBehaviour, InfuseAs<InfuseServiceCollection<ExampleService>>
+{
+    private void Awake()
+    {
+        InfuseManager.Infuse(this);
+    }
+}
+```
+
+We can now use this service collection as a dependency;
+
+```csharp
+public class ExampleClient : MonoBehaviour
+{
+    private void Awake()
+    {
+        InfuseManager.Infuse(this);
+    }
+
+    private void OnInfuse(InfuseServiceCollection<ExampleService> exampleServiceCollection)
+    {
+        // ...
+    }
+    
+    private void OnDefuse()
+    {
+        // ...
+    }
+}
+```
+
+An ```InfuseServiceCollection``` becomes available as a dependency (calling ```ExampleClient.OnInfuse()```) as soon as it contains one or more instances. It becomes unavailable (calling ```ExampleClient.OnDefuse()```) when it is empty.
+
+This is only one example of a Service Container, and Infuse also comes with an ```InfuseServiceStack``` which allows one service to override another. You can also write your own classes which should inherit from ```ServiceContainer```.
