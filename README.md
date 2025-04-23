@@ -45,6 +45,7 @@ Infuse is designed with a number of goals;
 using UnityEngine;
 using Infuse;
 
+// The InfuseAs<> declaration ensures that this service will be made available as ExampleService after OnInfuse().
 public class ExampleService : MonoBehaviour, InfuseAs<ExampleService>
 {
     private void Awake()
@@ -98,3 +99,43 @@ This means that we can have a complex hierarchy of interdependant components wit
 ```InfuseManager.Infuse(this)``` simply registers an object with the built-in default Infuse Context object. It can be invoked at any time, and an object can be unregistered with the ```InfuseManager.Defuse(...)``` call.
 
 In addition, the Infuse Context automatically unregisters a MonoBehaviour when it's destroyCancellationToken is triggered. This means that a MonoBehaviour object will automatically be unregistered when it is destroyed and calling ```InfuseManager.Defuse(this)``` in ```OnDestroy()``` is unnecessary. However this behaviour can be disabled if necessary.
+
+
+## Unity 6 Awaitable Support Example
+
+```csharp
+using UnityEngine;
+using Infuse;
+
+// The InfuseAs<> declaration ensures that this service will be made available as ExampleService after OnInfuse().
+public class ExampleService : MonoBehaviour, InfuseAs<ExampleService>
+{
+    private void Awake()
+    {
+        // Register this object with the default context.
+        InfuseManager.Infuse(this);
+    }
+    
+    // As this object has no dependencies, this method is immediately invoked via InfuseManager.Infuse(this).
+    private async Awaitable OnInfuse()
+    {
+        // Service starting.
+        await InitializeAsync();
+    }
+    
+    // This method will be called automatically when this object is destroyed.
+    private void OnDefuse()
+    {
+        // Service stopping
+    }
+    
+    private async Awaitable InitializeAsync()
+    {
+        await Awaitable.NextFrameAsync();
+        
+        // We can perform any other asynchronous operations we like here.
+    }
+}
+```
+
+This is identical to the example above, except the ```OnInfuse()``` function is asynchronous and returns an Awaitable object as provided by Unity 6. This means that a service can have a heavyweight initialisation function which takes multiple frames to complete, and it's dependencies will wait until it has been fully initialised before their ```OnInfuse()``` methods are called.
