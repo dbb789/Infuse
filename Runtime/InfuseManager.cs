@@ -18,6 +18,16 @@ namespace Infuse
         {
             _context.Defuse(instance);
         }
+        
+        public static void RegisterService<TServiceType>(object instance) where TServiceType : class
+        {
+            _context.RegisterService<TServiceType>(instance);
+        }
+        
+        public static void UnregisterService<TServiceType>(object instance) where TServiceType : class
+        {
+            _context.UnregisterService<TServiceType>(instance);
+        }
 
         private static InfuseContext GetGlobalContext()
         {

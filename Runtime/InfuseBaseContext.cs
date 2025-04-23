@@ -84,6 +84,16 @@ namespace Infuse
             _instanceMap.Remove(type, instance);
         }
         
+        public void RegisterService<TServiceType>(object instance) where TServiceType : class
+        {
+            RegisterService(typeof(TServiceType), instance);
+        }
+        
+        public void UnregisterService<TServiceType>(object instance) where TServiceType : class
+        {
+            UnregisterService(typeof(TServiceType), instance);
+        }
+
         private void UpdateResolvedState(InfuseTypeInfo infuseType)
         {
             bool nextResolved = _serviceMap.ContainsAll(infuseType.RequiredServices);

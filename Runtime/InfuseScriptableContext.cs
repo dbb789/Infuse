@@ -22,5 +22,15 @@ namespace Infuse
         {
             _baseContext.Defuse(instance);
         }
+
+        public void RegisterService<TServiceType>(object instance) where TServiceType : class
+        {
+            _baseContext.RegisterService<TServiceType>(instance);
+        }
+
+        public void UnregisterService<TServiceType>(object instance) where TServiceType : class
+        {
+            _baseContext.UnregisterService<TServiceType>(instance);
+        }
     }
 }
