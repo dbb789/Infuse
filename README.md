@@ -53,11 +53,13 @@ public class ExampleService : MonoBehaviour, InfuseAs<ExampleService>
         InfuseManager.Infuse(this);
     }
     
+    // As this object has no dependencies, this method is immediately invoked via InfuseManager.Infuse(this).
     private void OnInfuse()
     {
-        // Service starting
+        // Service starting.
     }
     
+    // This method will be called automatically when this object is destroyed.
     private void OnDefuse()
     {
         // Service stopping
@@ -75,13 +77,13 @@ public class ExampleClient : MonoBehaviour
         InfuseManager.Infuse(this);
     }
 
-    // Called after ExampleService.OnInfuse()
-    private void OnInfuse(ExampleServiceC exampleServiceC)
+    // Called after ExampleService.OnInfuse() due to the dependency declared as an argument in the method.
+    private void OnInfuse(ExampleService exampleService)
     {
         _exampleService = exampleService;
     }
 
-    // Called before ExampleService.OnDefuse()
+    // Called before ExampleService.OnDefuse(), again due to the dependency declared in OnInfuse() above.
     private void OnDefuse()
     {
         _exampleService = null;
