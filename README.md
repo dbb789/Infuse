@@ -47,10 +47,10 @@ Infuse is at it's core a very simple dependency injection system - that is, it s
 
 However unlike a 'traditional' dependency injection system, Infuse has to handle the scenarios where dependencies can randomly come in and out of existence within the Unity scene hierarchy. Given that this isn't the behaviour we'd normally expect to be able to handle with a regular constructor/destructor pair, new terminology is assigned to these events;
 
-- Infuse - This is when an object can be started as all of it's required dependencies have come available.
-- Defuse - This is when an object has to be stopped as one or more of it's required dependencies are no longer available.
+- Infuse - This is when an object is started as all of it's required dependencies have come available.
+- Defuse - This is when an object is stopped as one or more of it's required dependencies are no longer available.
 
-Given that it's quite common for an object to be destroyed or deactivated and then later instantiated or activated at some point in the future, a dependant object can be restarted as a result of ```OnDefuse()``` then ```OnInfuse()``` calls. This gives us the option to modify a scene at will without risking throwing exceptions as a result of dangling and/or invalid references.
+Given that it's quite common for an object to be destroyed or deactivated and then later instantiated or activated at some point in the future, a dependant object can be restarted as a result of a Defuse event followed by an Infuse event. This gives us the option to modify a scene at will without risking throwing exceptions as a result of dangling and/or invalid references.
 
 
 ## Infuse Context
@@ -62,7 +62,7 @@ namespace Infuse
 {
     public interface InfuseContext
     {
-        void Register(object instance, bool defuseOnDestroy = true);
+        void Register(object instance, bool unregisterOnDestroy = true);
         void Unregister(object instance);
 
         void RegisterService<TServiceType>(object instance) where TServiceType : class;
