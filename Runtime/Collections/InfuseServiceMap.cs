@@ -8,7 +8,7 @@ namespace Infuse.Collections
 {
     public class InfuseServiceMap
     {
-        public IEnumerable<Type> Types => _serviceMap.Keys;
+        public IEnumerable<KeyValuePair<Type, object>> Services => _serviceMap;
         
         private Dictionary<Type, object> _serviceMap;
 
@@ -100,12 +100,17 @@ namespace Infuse.Collections
                 throw new InfuseException($"Type {type} is not assignable from {instance.GetType()}.");
             }
         }
-
-        public bool ContainsAll(List<Type> requiredServices)
+        
+        public bool Contains(Type service)
         {
-            foreach (var type in requiredServices)
+            return _serviceMap.ContainsKey(service);
+        }
+        
+        public bool ContainsAll(List<Type> serviceList)
+        {
+            foreach (var service in serviceList)
             {
-                if (!_serviceMap.ContainsKey(type))
+                if (!Contains(service))
                 {
                     return false;
                 }

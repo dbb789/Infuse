@@ -15,102 +15,47 @@ namespace Infuse.Editor
             var root = new VisualElement();
 
             root.Add(CreateRegisteredTypesFoldout());
-            
-            var instanceListFoldout = new Foldout
-            {
-                text = "Registered Instances"
-            };
-
-            var instanceList = new ScrollView
-            {
-                verticalScrollerVisibility = ScrollerVisibility.Auto,
-                horizontalScrollerVisibility = ScrollerVisibility.Hidden
-            };
-
-            instanceListFoldout.Add(instanceList);
-            root.Add(instanceListFoldout);
-
-            instanceList.schedule.Execute(() =>
-            {
-                if (!Application.isPlaying)
-                {
-                    return;
-                }
-
-                var context = (InfuseScriptableContext)target;
-
-                instanceList.Clear();
-
-                foreach (var instanceType in context.InstanceMap.Types)
-                {
-                    var instanceElement = new VisualElement();
-                    
-                    instanceElement.Add(new Label(GetReadableTypeName(instanceType)));
-                    
-                    var instances = context.InstanceMap.GetInstanceSet(instanceType);
-                    
-                    foreach (var instance in instances)
-                    {
-                        if (instance is UnityEngine.Object unityObject)
-                        {
-                            var objectField = new ObjectField
-                            {
-                                label = "Object",
-                                objectType = instance.GetType(),
-                                value = unityObject
-                            };
-
-                            instanceElement.Add(objectField);
-                        }
-                        else
-                        {
-                            var instanceLabel = new Label($"{instance}");
-
-                            instanceElement.Add(instanceLabel);
-                        }
-                    }
-
-                    instanceList.Add(instanceElement);
-                }
-            }).Every(1000);
-            
-            var serviceListFoldout = new Foldout
-            {
-                text = "Registered Services"
-            };
-
-            var serviceList = new ScrollView
-            {
-                verticalScrollerVisibility = ScrollerVisibility.Auto,
-                horizontalScrollerVisibility = ScrollerVisibility.Hidden
-            };
-
-            serviceListFoldout.Add(serviceList);
-            root.Add(serviceListFoldout);
-
-            serviceList.schedule.Execute(() =>
-            {
-                if (!Application.isPlaying)
-                {
-                    return;
-                }
-
-                var context = (InfuseScriptableContext)target;
-
-                serviceList.Clear();
-
-                foreach (var serviceType in context.ServiceMap.Types)
-                {
-                    var serviceElement = new VisualElement();
-
-                    serviceElement.Add(new Label(GetReadableTypeName(serviceType)));
-                    serviceList.Add(serviceElement);
-                }
-            }).Every(1000);
+            root.Add(CreateRegisteredServicesFoldout());
+            root.Add(CreateRegisteredInstancesFoldout());
 
             return root;
         }
+        
+        private VisualElement CreateRegisteredServicesFoldout()
+        {
+            var foldout = new Foldout
+            {
+                text = "Registered Services"
+            };
+            
+            var list = new VisualElement();
 
+            foldout.Add(list);
+
+            list.schedule.Execute(() =>
+            {
+                if (!Application.isPlaying)
+                {
+                    return;
+                }
+                
+                var context = (InfuseScriptableContext)target;
+                
+                list.Clear();
+
+                foreach (var (serviceType, service) in context.ServiceMap.Services)
+                {
+                    var serviceElement = new InfuseServiceVisualElement();
+
+                    serviceElement.SetContent(serviceType, service);
+                    
+                    list.Add(serviceElement);
+                }
+            }).Every(1000);
+
+            return foldout;
+        }
+                
         private VisualElement CreateRegisteredTypesFoldout()
         {
             var foldout = new Foldout
@@ -118,11 +63,7 @@ namespace Infuse.Editor
                 text = "Registered Types"
             };
             
-            var list = new ScrollView
-            {
-                verticalScrollerVisibility = ScrollerVisibility.Auto,
-                horizontalScrollerVisibility = ScrollerVisibility.Hidden
-            };
+            var list = new VisualElement();
 
             foldout.Add(list);
 
@@ -139,54 +80,65 @@ namespace Infuse.Editor
 
                 foreach (var type in context.TypeMap.Types)
                 {
-                    var typeElementFoldout = new Foldout
-                    {
-                        text = type.InstanceType.ToString()
-                    };
+                    var element = new InfuseTypeInfoVisualElement();
 
-                    var typeElementBox = new Box();
-
-                    typeElementBox.Add(new Toggle
-                    {
-                        label = "Resolved",
-                        value = type.Resolved,
-                        enabledSelf = false
-                    });
-
-                    foreach (var providedService in type.ProvidedServices)
-                    {
-                        var serviceLabel = new Label($"Provides : {providedService}");
-                        typeElementBox.Add(serviceLabel);
-                    }
-
-                    typeElementFoldout.Add(typeElementBox);
-                    list.Add(typeElementFoldout);
+                    element.SetContent(type, context);
+                    
+                    list.Add(element);
                 }
                 
             }).Every(1000);
 
             return foldout;
         }
-
-        private static string GetReadableTypeName(Type type)
+        
+        private VisualElement CreateRegisteredInstancesFoldout()
         {
-            if (type == null)
+            var foldout = new Foldout
             {
-                return "null";
-            }
-            
-            if (type.IsGenericType)
-            {
-                var fullName = type.GetGenericTypeDefinition().FullName;
-                var genericName = fullName.Substring(0, fullName.IndexOf('`'));
-                var types = string.Join(", ", type.GetGenericArguments().Select(GetReadableTypeName));
+                text = "Registered Instances"
+            };
                 
-                return $"{genericName}<{types}>";
-            }
-            else
+            var list = new VisualElement();
+            
+            foldout.Add(list);
+            
+            list.schedule.Execute(() =>
             {
-                return type.FullName;
-            }
+                if (!Application.isPlaying)
+                {
+                    return;
+                }
+                
+                var context = (InfuseScriptableContext)target;
+                
+                list.Clear();
+
+                foreach (var instanceType in context.InstanceMap.Types)
+                {
+                    var instanceTypeFoldout = new Foldout
+                    {
+                        text = InfuseEditorUtil.GetReadableTypeName(instanceType)
+                    };
+                    
+                    var instanceList = new VisualElement();
+                    var instances = context.InstanceMap.GetInstanceSet(instanceType);
+                    
+                    foreach (var instance in instances)
+                    {
+                        var element = new InfuseInstanceVisualElement();
+
+                        element.SetContent(instance);
+                        
+                        instanceList.Add(element);
+                    }
+
+                    instanceTypeFoldout.Add(instanceList);
+                    list.Add(instanceTypeFoldout);
+                }
+            }).Every(1000);
+            
+            return foldout;
         }
     }
 }
