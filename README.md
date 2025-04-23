@@ -17,9 +17,9 @@ However, Unity MonoBehaviours have several major caveats;
  - MonoBehaviours are interconnected within scenes using serialized fields. These need to be maintained manually and can quickly degrade into an evil mess as the scene hierarchy scales larger and larger.
 
 There are numerous solutions to these problems;
- - Various dependency injection frameworks exist, although these are often quite heavyweight and force a software project to be developed in a particular way.
+ - Various dependency injection frameworks already exist, although these are often quite heavyweight and may force a software project to be developed in a particular way.
  
- - Services can be referenced via a ScriptableObject which essentially mediates between services and their dependants, although this doesn't always solve the issue of MonoBehaviour initialisation order.
+ - Services can be referenced via a ScriptableObject which mediates between services and their dependants, although this doesn't always solve the issue of MonoBehaviour initialisation order.
  
  - Some components simply instantiate themselves as singleton objects, and while this is a relatively simple solution, it comes with all the usual issues associated with the use of singletons.
  
@@ -30,13 +30,13 @@ There are numerous solutions to these problems;
 Infuse is designed with a number of goals;
  - To be simple as possible - a simple API, clearly-defined behaviour, no intrusive editor extensions, and no dependencies other than Unity.
  
- - To interoperate easily with idiomatic Unity projects - allows Infuse to be retrofitted to existing projects and allows developers to choose how they design their own software.
+ - To interoperate easily with idiomatic Unity projects - allows Infuse to be retrofitted to existing projects without heavy refactoring and doesn't force a project to be designed in a particular way.
  
  - Interoperate with Unity itself - adding or removing MonoBehaviours in play mode shouldn't guarantee a spew of errors in the console.
  
- - No requirement to use serialization to reference components - this avoids broken references between scenes/prefabs and keeps dependencies as hidden implementation details, rather than properties that are exposed to the inspector.
+ - No requirement to use serialization to reference components - this avoids broken references between scenes/prefabs and keeps dependencies as hidden implementation details, rather than properties that are exposed to the inspector. This also means that game designers aren't forced to manage implementation details when building prefabs or making changes to a scene.
  
- - No requirements to use base classes - other existing frameworks already require that certain components extend existing base classes, so of course this would immediately introduce a potential incompatibility. This can potentially also force the use of base classes where a dependency on Infuse would otherwise be unnecessary.
+ - No requirement to use base classes - other existing frameworks already require that certain components extend base classes, so this avoids a potential incompatibility. This also avoids forcing the use of base classes where a dependency on Infuse would otherwise be unnecessary.
 
 
 ## Basic Usage Example
