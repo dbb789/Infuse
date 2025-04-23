@@ -53,6 +53,27 @@ However unlike a 'traditional' dependency injection system, Infuse has to handle
 Given that it's quite common for an object to be destroyed or deactivated and then later instantiated or activated at some point in the future, a dependant object can be restarted as a result of ```OnDefuse()``` then ```OnInfuse()``` calls. This gives us the option to modify a scene at will without risking throwing exceptions as a result of dangling and/or invalid references.
 
 
+## Infuse Context
+
+An Infuse Context is a container which tracks the entire state of an Infuse scope, and only comprises of four methods, which we'll discuss in detail later;
+
+```csharp
+namespace Infuse
+{
+    public interface InfuseContext
+    {
+        void Infuse(object instance, bool defuseOnDestroy = true);
+        void Defuse(object instance);
+
+        void RegisterService<TServiceType>(object instance) where TServiceType : class;
+        void UnregisterService<TServiceType>(object instance) where TServiceType : class;
+    }
+}
+```
+
+Given that the vast majority of projects only require one context, a global context bound to a ScriptableObject is stored within ```InfuseManager``` and wrapped using static methods. This is purely for developer convenience, and we'll use it in the examples below.
+
+
 ## Basic Usage Example
 
 ```csharp
