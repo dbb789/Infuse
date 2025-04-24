@@ -13,7 +13,7 @@ namespace Infuse.Collections
         public IEnumerable<Type> Dependencies => _dependencies;
 
         public delegate void InfuseFunc(object instance,
-                                        InfuseServiceMap serviceMap,
+                                        ServiceMap serviceMap,
                                         InfuseTypeInfo typeInfo,
                                         Action<InfuseTypeInfo, object> onInfuseCompleted);
 
@@ -34,7 +34,7 @@ namespace Infuse.Collections
         }
 
         public void Invoke(object instance,
-                           InfuseServiceMap serviceMap,
+                           ServiceMap serviceMap,
                            InfuseTypeInfo typeInfo,
                            Action<InfuseTypeInfo, object> onInfuseCompleted)
         {

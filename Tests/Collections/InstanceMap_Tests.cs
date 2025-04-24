@@ -4,7 +4,7 @@ using Infuse.Collections;
 
 namespace Infuse.Collections.Tests
 {
-    public class InfuseInstanceMap_Tests
+    public class InstanceMap_Tests
     {
         private class TestClassA { }
         private class TestClassB { }
@@ -21,13 +21,13 @@ namespace Infuse.Collections.Tests
         [Test]
         public void Empty()
         {
-            var instanceMap = new InfuseInstanceMap();
+            var instanceMap = new InstanceMap();
         }
 
         [Test]
         public void SimpleAdd()
         {
-            var instanceMap = new InfuseInstanceMap();
+            var instanceMap = new InstanceMap();
             var instanceA = new TestClassA();
             var instanceB = new TestClassB();
 
@@ -41,7 +41,7 @@ namespace Infuse.Collections.Tests
         [Test]
         public void SimpleRemove()
         {
-            var instanceMap = new InfuseInstanceMap();
+            var instanceMap = new InstanceMap();
             var instanceA = new TestClassA();
             var instanceB = new TestClassB();
 
@@ -61,7 +61,7 @@ namespace Infuse.Collections.Tests
         [Test]
         public void InvokeDisposable()
         {
-            var instanceMap = new InfuseInstanceMap();
+            var instanceMap = new InstanceMap();
             var instanceA = new TestClassA();
             var disposable = new TestDisposable();
 

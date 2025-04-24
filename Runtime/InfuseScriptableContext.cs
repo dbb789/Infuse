@@ -11,8 +11,8 @@ namespace Infuse
     public class InfuseScriptableContext : ScriptableObject, InfuseContext
     {
         public InfuseTypeInfoMap TypeMap => GetBaseContext().TypeMap;
-        public InfuseInstanceMap InstanceMap => GetBaseContext().InstanceMap;
-        public InfuseServiceMap ServiceMap => GetBaseContext().ServiceMap;
+        public InstanceMap InstanceMap => GetBaseContext().InstanceMap;
+        public ServiceMap ServiceMap => GetBaseContext().ServiceMap;
 
         [SerializeField]
         private InfuseScriptableContext _parentContext = null;

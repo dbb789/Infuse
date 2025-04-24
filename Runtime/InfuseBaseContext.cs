@@ -9,16 +9,16 @@ namespace Infuse
     public class InfuseBaseContext : InfuseContext
     {
         public InfuseTypeInfoMap TypeMap => _typeMap;
-        public InfuseServiceMap ServiceMap => _serviceMap;
-        public InfuseInstanceMap InstanceMap => _instanceMap;
+        public ServiceMap ServiceMap => _serviceMap;
+        public InstanceMap InstanceMap => _instanceMap;
         
         private readonly InfuseTypeInfoMap _typeMap;
-        private readonly InfuseServiceMap _serviceMap;
-        private readonly InfuseInstanceMap _instanceMap;
+        private readonly ServiceMap _serviceMap;
+        private readonly InstanceMap _instanceMap;
         private readonly Action<object> _destroyCancellationCallback;
         private readonly Action<InfuseTypeInfo, object> _onInfuseCompleted;
         
-        public InfuseBaseContext(InfuseServiceMap parentServiceMap = null)
+        public InfuseBaseContext(ServiceMap parentServiceMap = null)
         {
             _typeMap = new();
             _serviceMap = new(parentServiceMap);

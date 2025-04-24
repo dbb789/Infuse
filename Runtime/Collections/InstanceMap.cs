@@ -5,15 +5,15 @@ using UnityEngine;
 
 namespace Infuse.Collections
 {
-    public class InfuseInstanceMap
+    public class InstanceMap
     {
         public IEnumerable<Type> Types => _instanceMap?.Keys ?? Enumerable.Empty<Type>();
         
-        private Dictionary<Type, InfuseInstanceSet> _instanceMap;
+        private Dictionary<Type, InstanceSet> _instanceMap;
 
-        public InfuseInstanceMap()
+        public InstanceMap()
         {
-            _instanceMap = new Dictionary<Type, InfuseInstanceSet>();
+            _instanceMap = new Dictionary<Type, InstanceSet>();
         }
 
         public void Add(Type type, object instance, IDisposable disposable = null)
@@ -36,9 +36,9 @@ namespace Infuse.Collections
             return false;
         }
         
-        public InfuseInstanceSet GetInstanceSet(Type type)
+        public InstanceSet GetInstanceSet(Type type)
         {
-            InfuseInstanceSet instanceSet;
+            InstanceSet instanceSet;
             
             if (!_instanceMap.TryGetValue(type, out instanceSet))
             {

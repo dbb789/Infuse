@@ -6,11 +6,11 @@ using Infuse.Common;
 
 namespace Infuse.Collections.Tests
 {
-    public class InfuseServiceMap_Tests
+    public class ServiceMap_Tests
     {
         private class TestClassA { }
         private class TestClassB { }
-        private class TestServiceContainer<T> : InfuseServiceContainer<T> where T : class
+        private class TestServiceContainer<T> : ServiceContainer<T> where T : class
         {
             public T Instance;
             public override bool Populated => _populated;
@@ -35,7 +35,7 @@ namespace Infuse.Collections.Tests
             }
         }
         
-        private class ThrowServiceContainer<T> : InfuseServiceContainer<T> where T : class
+        private class ThrowServiceContainer<T> : ServiceContainer<T> where T : class
         {
             public override bool Populated => false;
 
@@ -53,7 +53,7 @@ namespace Infuse.Collections.Tests
             
         }
 
-        private class EternalServiceContainer<T> : InfuseServiceContainer<T> where T : class
+        private class EternalServiceContainer<T> : ServiceContainer<T> where T : class
         {
             public override bool Populated => true;
 
@@ -71,7 +71,7 @@ namespace Infuse.Collections.Tests
         [Test]
         public void Empty()
         {
-            var serviceMap = new InfuseServiceMap();
+            var serviceMap = new ServiceMap();
 
             Assert.IsFalse(serviceMap.Contains(typeof(TestClassA)));
             Assert.Throws<InfuseException>(() => serviceMap.GetService(typeof(TestClassA)));
@@ -82,7 +82,7 @@ namespace Infuse.Collections.Tests
         [Test]
         public void RegisterUnregister()
         {
-            var serviceMap = new InfuseServiceMap();
+            var serviceMap = new ServiceMap();
             var instanceA = new TestClassA();
             var instanceB = new TestClassB();
 
@@ -112,7 +112,7 @@ namespace Infuse.Collections.Tests
         [Test]
         public void InvalidAssignment()
         {
-            var serviceMap = new InfuseServiceMap();
+            var serviceMap = new ServiceMap();
             var instanceA = new TestClassA();
             var instanceB = new TestClassB();
 
@@ -126,7 +126,7 @@ namespace Infuse.Collections.Tests
         [Test]
         public void UnregisterNonExistent()
         {
-            var serviceMap = new InfuseServiceMap();
+            var serviceMap = new ServiceMap();
             var instanceA = new TestClassA();
             var instanceB = new TestClassB();
 
@@ -141,7 +141,7 @@ namespace Infuse.Collections.Tests
         [Test]
         public void RegisterUnregisterServiceContainer()
         {
-            var serviceMap = new InfuseServiceMap();
+            var serviceMap = new ServiceMap();
             var instanceA = new TestClassA();
             var instanceB = new TestClassB();
 
@@ -193,7 +193,7 @@ namespace Infuse.Collections.Tests
         [Test]
         public void ServiceContainerMultiRegister()
         {
-            var serviceMap = new InfuseServiceMap();
+            var serviceMap = new ServiceMap();
             var instance0 = new TestClassA();
             var instance1 = new TestClassA();
 
@@ -215,7 +215,7 @@ namespace Infuse.Collections.Tests
         [Test]
         public void ServiceContainerRegisterThrow()
         {
-            var serviceMap = new InfuseServiceMap();
+            var serviceMap = new ServiceMap();
             var instance = new TestClassA();
             
             Assert.Throws<Exception>(() => serviceMap.Register(typeof(ThrowServiceContainer<TestClassA>), instance));
@@ -225,7 +225,7 @@ namespace Infuse.Collections.Tests
         [Test]
         public void ServiceContainerKeepActiveWhilePopulated()
         {
-            var serviceMap = new InfuseServiceMap();
+            var serviceMap = new ServiceMap();
             var instance = new TestClassA();
 
             serviceMap.Register(typeof(EternalServiceContainer<TestClassA>), instance);

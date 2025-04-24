@@ -5,13 +5,13 @@ using Infuse.Common;
 
 namespace Infuse.Collections.Tests
 {
-    public class InfuseServiceContainer_Tests
+    public class ServiceContainer_Tests
     {
         private interface ITestInterfaceA { }
         private class TestClassA : ITestInterfaceA { }
         private class TestClassB { }
         
-        private class TestServiceContainer<T> : InfuseServiceContainer<T> where T : class
+        private class TestServiceContainer<T> : ServiceContainer<T> where T : class
         {
             public T Instance;
             public override bool Populated => _populated;

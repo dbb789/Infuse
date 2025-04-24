@@ -2,7 +2,7 @@ using Infuse.Common;
 
 namespace Infuse.Collections
 {
-    public abstract class InfuseServiceContainer<T> : InfuseServiceContainer where T : class
+    public abstract class ServiceContainer<T> : ServiceContainer where T : class
     {
         public override void Register(object instance)
         {
@@ -32,7 +32,7 @@ namespace Infuse.Collections
         public abstract void Unregister(T instance);
     }
 
-    public abstract class InfuseServiceContainer
+    public abstract class ServiceContainer
     {
         public abstract bool Populated { get; }
         

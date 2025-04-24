@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Infuse.Collections
 {
-    public class InfuseInstanceSet
+    public class InstanceSet
     {
         public struct Enumerator
         {
@@ -24,7 +24,7 @@ namespace Infuse.Collections
         
         private Dictionary<object, IDisposable> _instanceSet;
 
-        public InfuseInstanceSet()
+        public InstanceSet()
         {
             _instanceSet = new();
         }

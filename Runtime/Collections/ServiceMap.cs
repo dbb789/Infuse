@@ -6,14 +6,14 @@ using Infuse.Util;
 
 namespace Infuse.Collections
 {
-    public class InfuseServiceMap
+    public class ServiceMap
     {
         public IEnumerable<KeyValuePair<Type, object>> Services => _serviceMap;
         
         private Dictionary<Type, object> _serviceMap;
-        private InfuseServiceMap _parent;
+        private ServiceMap _parent;
         
-        public InfuseServiceMap(InfuseServiceMap parent = null)
+        public ServiceMap(ServiceMap parent = null)
         {
             _serviceMap = new Dictionary<Type, object>();
             _parent = parent;
@@ -31,18 +31,18 @@ namespace Infuse.Collections
                 Debug.Log($"Infuse: Registering service of type {type}.");
                 _serviceMap.Add(type, instance);
             }
-            else if (typeof(InfuseServiceContainer).IsAssignableFrom(type))
+            else if (typeof(ServiceContainer).IsAssignableFrom(type))
             {
-                InfuseServiceContainer container;
+                ServiceContainer container;
                 bool toAdd = false;
 
                 if (_serviceMap.TryGetValue(type, out var existing))
                 {
-                    container = (InfuseServiceContainer)existing;
+                    container = (ServiceContainer)existing;
                 }
                 else
                 {
-                    container = (InfuseServiceContainer)Activator.CreateInstance(type);
+                    container = (ServiceContainer)Activator.CreateInstance(type);
                     toAdd = true;
                 }
 
@@ -78,11 +78,11 @@ namespace Infuse.Collections
                 Debug.Log($"Infuse: Unregistering service of type {type}.");
                 _serviceMap.Remove(type);
             }
-            else if (typeof(InfuseServiceContainer).IsAssignableFrom(type))
+            else if (typeof(ServiceContainer).IsAssignableFrom(type))
             {
                 if (_serviceMap.TryGetValue(type, out var existing))
                 {
-                    var container = (InfuseServiceContainer)existing;
+                    var container = (ServiceContainer)existing;
                     
                     container.Unregister(instance);
 

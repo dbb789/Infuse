@@ -27,7 +27,7 @@ namespace Infuse.Util
                 if (InfuseServiceUtil.TryGetServiceType(interfaceType, out var serviceType))
                 {
                     if (serviceType.IsAssignableFrom(type) ||
-                        typeof(InfuseServiceContainer).IsAssignableFrom(serviceType))
+                        typeof(ServiceContainer).IsAssignableFrom(serviceType))
                     {
                         provides.Add(serviceType);
                     }
@@ -150,13 +150,13 @@ namespace Infuse.Util
             //                                                     (Type2)serviceMap.GetService(typeof(Type2)))
             
             var instanceParameter = Expression.Parameter(typeof(object), "instance");
-            var serviceMapParameter = Expression.Parameter(typeof(InfuseServiceMap), "serviceMap");
-            var invokeExpression = Expression.Lambda<Action<object, InfuseServiceMap>>(
+            var serviceMapParameter = Expression.Parameter(typeof(ServiceMap), "serviceMap");
+            var invokeExpression = Expression.Lambda<Action<object, ServiceMap>>(
                 Expression.Call(Expression.Convert(instanceParameter, type),
                                 method,
                                 parameterTypeArray.Select(
                                     t => Expression.Convert(Expression.Call(serviceMapParameter,
-                                                                            typeof(InfuseServiceMap).GetMethod("GetService"),
+                                                                            typeof(ServiceMap).GetMethod("GetService"),
                                                                             Expression.Constant(t)), t)).ToArray()),
                 instanceParameter,
                 serviceMapParameter);
@@ -186,13 +186,13 @@ namespace Infuse.Util
 
             // As above except we're returning the Awaitable.
             var instanceParameter = Expression.Parameter(typeof(object), "instance");
-            var serviceMapParameter = Expression.Parameter(typeof(InfuseServiceMap), "serviceMap");
-            var invokeExpression = Expression.Lambda<Func<object, InfuseServiceMap, Awaitable>>(
+            var serviceMapParameter = Expression.Parameter(typeof(ServiceMap), "serviceMap");
+            var invokeExpression = Expression.Lambda<Func<object, ServiceMap, Awaitable>>(
                 Expression.Call(Expression.Convert(instanceParameter, type),
                                 method,
                                 parameterTypeArray.Select(
                                     t => Expression.Convert(Expression.Call(serviceMapParameter,
-                                                                            typeof(InfuseServiceMap).GetMethod("GetService"),
+                                                                            typeof(ServiceMap).GetMethod("GetService"),
                                                                             Expression.Constant(t)), t)).ToArray()),
                 instanceParameter,
                 serviceMapParameter);

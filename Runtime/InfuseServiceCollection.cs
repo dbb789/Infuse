@@ -5,7 +5,7 @@ using Infuse.Collections;
 
 namespace Infuse
 {
-    public class InfuseServiceCollection<TServiceType> : InfuseServiceContainer<TServiceType>
+    public class InfuseServiceCollection<TServiceType> : ServiceContainer<TServiceType>
         where TServiceType : class
     {
         public override bool Populated => _services.Count > 0;

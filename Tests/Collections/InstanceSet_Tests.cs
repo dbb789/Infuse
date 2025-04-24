@@ -3,12 +3,12 @@ using Infuse.Collections;
 
 namespace Infuse.Collections.Tests
 {
-    public class InfuseInstanceSet_Tests
+    public class InstanceSet_Tests
     {
         [Test]
         public void Empty()
         {
-            var instanceSet = new InfuseInstanceSet();
+            var instanceSet = new InstanceSet();
             
             Assert.AreEqual(instanceSet.Count, 0);
 
@@ -20,7 +20,7 @@ namespace Infuse.Collections.Tests
         [Test]
         public void Add()
         {
-            var instanceSet = new InfuseInstanceSet();
+            var instanceSet = new InstanceSet();
             var instance = new object();
 
             Assert.IsTrue(instanceSet.Add(instance));
@@ -37,7 +37,7 @@ namespace Infuse.Collections.Tests
         [Test]
         public void Remove()
         {
-            var instanceSet = new InfuseInstanceSet();
+            var instanceSet = new InstanceSet();
             var instance = new object();
 
             Assert.IsTrue(instanceSet.Add(instance));
@@ -54,7 +54,7 @@ namespace Infuse.Collections.Tests
         [Test]
         public void Multiple()
         {
-            var instanceSet = new InfuseInstanceSet();
+            var instanceSet = new InstanceSet();
             var instanceA = new object();
             var instanceB = new object();
             var instanceC = new object();

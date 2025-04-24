@@ -54,7 +54,7 @@ namespace Infuse.Collections
         }
         
         public void Infuse(object instance,
-                           InfuseServiceMap serviceMap,
+                           ServiceMap serviceMap,
                            Action<InfuseTypeInfo, object> onInfuseCompleted)
         {
             _infuseFunc.Invoke(instance, serviceMap, this, onInfuseCompleted);

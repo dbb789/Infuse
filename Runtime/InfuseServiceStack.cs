@@ -6,7 +6,7 @@ using Infuse.Common;
 
 namespace Infuse
 {
-    public class InfuseServiceStack<TServiceType> : InfuseServiceContainer<TServiceType>
+    public class InfuseServiceStack<TServiceType> : ServiceContainer<TServiceType>
         where TServiceType : class
     {
         public override bool Populated => _stack.Count > 0;
