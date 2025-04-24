@@ -1,11 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
-using Infuse;
 
 namespace Infuse.Examples
 {
     // Very simple GameObject pool implementation for demonstration purposes.
-    public abstract class SimplePool : MonoBehaviour
+    public abstract class SimplePool : MonoBehaviour, ISimplePool
     {
         [SerializeField]
         private GameObject _prefab;
@@ -27,19 +26,6 @@ namespace Infuse.Examples
             }
         }
         
-        private void OnEnable()
-        {
-            // We're calling Defuse() ourselves here, so pass false as a second
-            // argument to disable automatically calling Defuse() on
-            // MonoBehaviour destroy.
-            InfuseManager.Register(this, false);
-        }
-
-        private void OnDisable()
-        {
-            InfuseManager.Unregister(this);
-        }
-
         protected abstract GameObject CreateInstance(GameObject prefab, Transform parent);
 
         public GameObject Get()

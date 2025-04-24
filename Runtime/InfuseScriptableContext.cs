@@ -10,12 +10,23 @@ namespace Infuse
     [CreateAssetMenu(menuName = "Infuse/InfuseScriptableContext", fileName = "InfuseScriptableContext")]
     public class InfuseScriptableContext : ScriptableObject, InfuseContext
     {
-        public InfuseTypeInfoMap TypeMap => _baseContext.TypeMap;
-        public InfuseInstanceMap InstanceMap => _baseContext.InstanceMap;
-        public InfuseServiceMap ServiceMap => _baseContext.ServiceMap;
+        public InfuseTypeInfoMap TypeMap => GetBaseContext().TypeMap;
+        public InfuseInstanceMap InstanceMap => GetBaseContext().InstanceMap;
+        public InfuseServiceMap ServiceMap => GetBaseContext().ServiceMap;
+
+        [SerializeField]
+        private InfuseScriptableContext _parentContext = null;
         
-        private InfuseBaseContext _baseContext = new();
-        
+        private InfuseBaseContext _baseContext;
+
+        // Unity's ScriptableObject lifetime isn't particularly clearly defined
+        // and changes between editor, player and platform. So we'll lazily
+        // initialise the context and discard it for replacement in OnDisable().
+        private void OnDisable()
+        {
+            _baseContext = null;
+        }
+
         /**
          * Register an object instance with this Infuse Context.
          * @param instance The object instance to register.
@@ -23,7 +34,7 @@ namespace Infuse
          */
         public void Register(object instance, bool unregisterOnDestroy = true)
         {
-            _baseContext.Register(instance, unregisterOnDestroy);
+            GetBaseContext().Register(instance, unregisterOnDestroy);
         }
 
         /**
@@ -32,7 +43,7 @@ namespace Infuse
          */
         public void Unregister(object instance)
         {
-            _baseContext.Unregister(instance);
+            GetBaseContext().Unregister(instance);
         }
 
         /**
@@ -42,7 +53,7 @@ namespace Infuse
          */
         public void RegisterService<TServiceType>(object instance) where TServiceType : class
         {
-            _baseContext.RegisterService<TServiceType>(instance);
+            GetBaseContext().RegisterService<TServiceType>(instance);
         }
 
         /**
@@ -52,7 +63,19 @@ namespace Infuse
          */
         public void UnregisterService<TServiceType>(object instance) where TServiceType : class
         {
-            _baseContext.UnregisterService<TServiceType>(instance);
+            GetBaseContext().UnregisterService<TServiceType>(instance);
+        }
+
+        /**
+         * Invoked to lazily create the stored InfuseBaseContext. Override this
+         * to create a custom context.
+         * @return The InfuseBaseContext instance.
+         */
+        protected virtual InfuseBaseContext GetBaseContext()
+        {
+            _baseContext ??= new InfuseBaseContext(_parentContext?.ServiceMap);
+
+            return _baseContext;
         }
     }
 }

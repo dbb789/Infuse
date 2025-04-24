@@ -11,10 +11,12 @@ namespace Infuse.Collections
         public IEnumerable<KeyValuePair<Type, object>> Services => _serviceMap;
         
         private Dictionary<Type, object> _serviceMap;
-
-        public InfuseServiceMap()
+        private InfuseServiceMap _parent;
+        
+        public InfuseServiceMap(InfuseServiceMap parent = null)
         {
             _serviceMap = new Dictionary<Type, object>();
+            _parent = parent;
         }
 
         public void Register(Type type, object instance)
@@ -103,7 +105,17 @@ namespace Infuse.Collections
         
         public bool Contains(Type service)
         {
-            return _serviceMap.ContainsKey(service);
+            if (_serviceMap.ContainsKey(service))
+            {
+                return true;
+            }
+
+            if (_parent != null)
+            {
+                return _parent.Contains(service);
+            }
+
+            return false;
         }
         
         public bool ContainsAll(List<Type> serviceList)
@@ -126,6 +138,11 @@ namespace Infuse.Collections
                 return instance;
             }
 
+            if (_parent != null)
+            {
+                return _parent.GetService(type);
+            }
+            
             throw new InfuseException($"Service of type {type} is not registered.");
         }
     }

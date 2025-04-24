@@ -9,8 +9,8 @@ namespace Infuse
     public class InfuseBaseContext : InfuseContext
     {
         public InfuseTypeInfoMap TypeMap => _typeMap;
-        public InfuseInstanceMap InstanceMap => _instanceMap;
         public InfuseServiceMap ServiceMap => _serviceMap;
+        public InfuseInstanceMap InstanceMap => _instanceMap;
         
         private readonly InfuseTypeInfoMap _typeMap;
         private readonly InfuseServiceMap _serviceMap;
@@ -18,13 +18,15 @@ namespace Infuse
         private readonly Action<object> _destroyCancellationCallback;
         private readonly Action<InfuseTypeInfo, object> _onInfuseCompleted;
         
-        public InfuseBaseContext()
+        public InfuseBaseContext(InfuseServiceMap parentServiceMap = null)
         {
             _typeMap = new();
-            _serviceMap = new();
+            _serviceMap = new(parentServiceMap);
             _instanceMap = new();
             _destroyCancellationCallback = (instance) => Unregister(instance);
             _onInfuseCompleted = OnInfuseCompleted;
+
+            _serviceMap.Register(typeof(InfuseContext), this);
         }
         
         public void Register(object instance, bool unregisterOnDestroy = true)
@@ -38,7 +40,7 @@ namespace Infuse
             
             if (_instanceMap.Contains(type, instance))
             {
-                Debug.LogWarning($"Instance of type {type} is already registered.");
+                Debug.LogWarning($"Infuse: Instance of type {type} is already registered.");
                 return;
             }
 
@@ -70,7 +72,7 @@ namespace Infuse
             
             if (!_instanceMap.Contains(type, instance))
             {
-                Debug.LogWarning($"Instance of type {type} is not registered.");
+                Debug.LogWarning($"Infuse: Instance of type {type} is not registered.");
                 return;
             }
 

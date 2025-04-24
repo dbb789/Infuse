@@ -18,7 +18,7 @@ namespace Infuse.Examples
         
         private void OnEnable()
         {
-            transform.position = Vector3.zero;
+            transform.localPosition = Vector3.zero;
             _velocity = new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), 0);
             _lifeTime = Time.time + Random.Range(2f, 3f);
 
