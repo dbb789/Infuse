@@ -72,7 +72,6 @@ namespace Infuse.Util
 
             return new InfuseTypeInfo(type,
                                       provides.AsEnumerable<Type>(),
-                                      onInfuseFunc.Dependencies,
                                       onInfuseFunc,
                                       onDefuseFunc);
         }
@@ -130,7 +129,7 @@ namespace Infuse.Util
         {
             if (method == null)
             {
-                return new OnInfuseFunc();
+                return OnInfuseFunc.Null;
             }
             
             if (method.ReturnType == typeof(Awaitable))
@@ -219,7 +218,7 @@ namespace Infuse.Util
         {
             if (method == null)
             {
-                return new OnDefuseFunc();
+                return OnDefuseFunc.Null;
             }
 
             // Building a lambda expression here should be a little bit faster

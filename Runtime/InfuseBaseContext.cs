@@ -35,9 +35,17 @@ namespace Infuse
             {
                 throw new ArgumentNullException(nameof(instance));
             }
-            
+
             var type = instance.GetType();
-            
+            var infuseType = GetInfuseType(type);
+
+            // This type has no interaction with Infuse and can be ignored. See
+            // also InfuseTypeInfo.cs.
+            if (infuseType.Empty)
+            {
+                return;
+            }
+
             if (_instanceMap.Contains(type, instance))
             {
                 Debug.LogWarning($"Infuse: Instance of type {type} is already registered.");
@@ -53,8 +61,6 @@ namespace Infuse
 
             _instanceMap.Add(type, instance, disposable);
             
-            var infuseType = GetInfuseType(type);
-            
             if (infuseType.Resolved)
             {
                 OnResolved(infuseType, instance);
@@ -69,14 +75,19 @@ namespace Infuse
             }
 
             var type = instance.GetType();
-            
+            var infuseType = GetInfuseType(type);
+
+            // As above.
+            if (infuseType.Empty)
+            {
+                return;
+            }
+
             if (!_instanceMap.Contains(type, instance))
             {
                 Debug.LogWarning($"Infuse: Instance of type {type} is not registered.");
                 return;
             }
-
-            var infuseType = GetInfuseType(type);
             
             if (infuseType.Resolved)
             {

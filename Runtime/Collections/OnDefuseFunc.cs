@@ -5,11 +5,19 @@ namespace Infuse.Collections
 {
     public class OnDefuseFunc
     {
+        public static readonly OnDefuseFunc Null = new OnDefuseFunc();
+
+        public bool Empty => _func == null;
         private Action<object> _func;
 
-        public OnDefuseFunc(Action<object> func = null)
+        private OnDefuseFunc()
         {
-            _func = func;
+            _func = null;
+        }
+        
+        public OnDefuseFunc(Action<object> func)
+        {
+            _func = func ?? throw new ArgumentNullException(nameof(func));
         }
         
         public void Invoke(object instance)

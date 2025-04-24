@@ -7,7 +7,10 @@ namespace Infuse.Collections
 {
     public class OnInfuseFunc
     {
-        public List<Type> Dependencies => _dependencies;
+        public static readonly OnInfuseFunc Null = new OnInfuseFunc();
+        
+        public bool Empty => _func == null;
+        public IEnumerable<Type> Dependencies => _dependencies;
 
         public delegate void InfuseFunc(object instance,
                                         InfuseServiceMap serviceMap,
@@ -15,18 +18,19 @@ namespace Infuse.Collections
                                         Action<InfuseTypeInfo, object> onInfuseCompleted);
 
         private readonly InfuseFunc _func;
-        private readonly List<Type> _dependencies;
+        private readonly Type [] _dependencies;
 
-        public OnInfuseFunc() : this(null, null)
+        private OnInfuseFunc()
         {
-            // ..
+            _func = null;
+            _dependencies = Array.Empty<Type>();
         }
 
         public OnInfuseFunc(InfuseFunc func,
                             IEnumerable<Type> dependencies)
         {
-            _func = func;
-            _dependencies = new List<Type>(dependencies ?? Enumerable.Empty<Type>());
+            _func = func ?? throw new ArgumentNullException(nameof(func));
+            _dependencies = dependencies?.ToArray() ?? Array.Empty<Type>();
         }
 
         public void Invoke(object instance,
