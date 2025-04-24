@@ -16,6 +16,8 @@ namespace Infuse.Editor
         {
             var root = new VisualElement();
 
+            InspectorElement.FillDefaultInspector(root, serializedObject, this);
+    
             root.Add(CreateRegisteredTypesFoldout());
             root.Add(CreateRegisteredServicesFoldout());
             root.Add(CreateRegisteredInstancesFoldout());
