@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework;
 using Infuse.Collections;
 
@@ -7,7 +8,16 @@ namespace Infuse.Collections.Tests
     {
         private class TestClassA { }
         private class TestClassB { }
+        private class TestDisposable : IDisposable
+        {
+            public bool Disposed { get; private set; }
 
+            public void Dispose()
+            {
+                Disposed = true;
+            }
+        }
+        
         [Test]
         public void Empty()
         {
@@ -46,6 +56,24 @@ namespace Infuse.Collections.Tests
 
             Assert.IsFalse(instanceMap.Contains(typeof(TestClassA), instanceA));
             Assert.IsFalse(instanceMap.Contains(typeof(TestClassB), instanceB));
+        }
+
+        [Test]
+        public void InvokeDisposable()
+        {
+            var instanceMap = new InfuseInstanceMap();
+            var instanceA = new TestClassA();
+            var disposable = new TestDisposable();
+
+            instanceMap.Add(typeof(TestClassA), instanceA, disposable);
+
+            Assert.IsTrue(instanceMap.Contains(typeof(TestClassA), instanceA));
+            Assert.IsFalse(disposable.Disposed);
+
+            instanceMap.Remove(typeof(TestClassA), instanceA);
+
+            Assert.IsFalse(instanceMap.Contains(typeof(TestClassA), instanceA));
+            Assert.IsTrue(disposable.Disposed);
         }
     }
 }
