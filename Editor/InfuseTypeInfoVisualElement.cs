@@ -45,7 +45,16 @@ namespace Infuse.Editor
             }
             
             _label.text = $"{InfuseEditorUtil.GetReadableTypeName(typeInfo.InstanceType)} ({instanceCount})";
-            _label.style.color = typeInfo.Resolved ? Color.green : Color.red;
+
+            if (context.TypeResolvedMap.TryGetResolved(typeInfo, out var resolved))
+            {
+                _label.style.color = resolved ? Color.green : Color.red;
+            }
+            else
+            {
+                // Shouldn't happen.
+                _label.style.color = Color.yellow;
+            }
             
             _requiredServicesList.Clear();
             

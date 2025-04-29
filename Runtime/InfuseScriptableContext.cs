@@ -9,7 +9,8 @@ namespace Infuse
      */
     public abstract class InfuseScriptableContext : ScriptableObject, InfuseContext
     {
-        public InfuseTypeInfoMap TypeMap => GetBaseContext().TypeMap;
+        public InfuseTypeInfoMap TypeInfoMap => GetBaseContext().TypeInfoMap;
+        public InfuseTypeResolvedMap TypeResolvedMap => GetBaseContext().TypeResolvedMap;
         public InstanceMap InstanceMap => GetBaseContext().InstanceMap;
         public ServiceMap ServiceMap => GetBaseContext().ServiceMap;
 

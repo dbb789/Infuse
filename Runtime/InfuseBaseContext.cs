@@ -8,19 +8,23 @@ namespace Infuse
 {
     public class InfuseBaseContext : InfuseContext, IDisposable
     {
-        public InfuseTypeInfoMap TypeMap => _typeMap;
+        public InfuseTypeInfoMap TypeInfoMap => _typeInfoMap;
+        public InfuseTypeResolvedMap TypeResolvedMap => _typeResolvedMap;
         public ServiceMap ServiceMap => _serviceMap;
         public InstanceMap InstanceMap => _instanceMap;
         
-        private readonly InfuseTypeInfoMap _typeMap;
+        private readonly InfuseTypeInfoMap _typeInfoMap;
+        private readonly InfuseTypeResolvedMap _typeResolvedMap;
         private readonly ServiceMap _serviceMap;
         private readonly InstanceMap _instanceMap;
         private readonly Action<object> _destroyCancellationCallback;
         private readonly Action<InfuseTypeInfo, object> _onInfuseCompleted;
         
-        public InfuseBaseContext(ServiceMap parentServiceMap = null)
+        public InfuseBaseContext(InfuseTypeInfoMap typeInfoMap,
+                                 ServiceMap parentServiceMap = null)
         {
-            _typeMap = new();
+            _typeInfoMap = typeInfoMap;
+            _typeResolvedMap = new();
             _serviceMap = new(parentServiceMap);
             _instanceMap = new();
             _destroyCancellationCallback = (instance) => Unregister(instance);
@@ -58,7 +62,7 @@ namespace Infuse
             _serviceMap.OnServiceTypeUnregistered -= ServiceTypeStateUpdated;
             _serviceMap.Dispose();
 
-            _typeMap.Dispose();
+            _typeInfoMap.Dispose();
         }
         
         public void Register(object instance, bool unregisterOnDestroy = true)
@@ -69,7 +73,7 @@ namespace Infuse
             }
 
             var type = instance.GetType();
-            var infuseType = GetInfuseType(type);
+            var (infuseType, resolved) = GetInfuseType(type);
 
             // This type has no interaction with Infuse and can be ignored. See
             // also InfuseTypeInfo.cs.
@@ -93,7 +97,7 @@ namespace Infuse
 
             _instanceMap.Add(type, instance, disposable);
             
-            if (infuseType.Resolved)
+            if (resolved)
             {
                 OnResolved(infuseType, instance);
             }
@@ -107,7 +111,7 @@ namespace Infuse
             }
 
             var type = instance.GetType();
-            var infuseType = GetInfuseType(type);
+            var (infuseType, resolved) = GetInfuseType(type);
 
             // As above.
             if (infuseType.Empty)
@@ -121,7 +125,7 @@ namespace Infuse
                 return;
             }
             
-            if (infuseType.Resolved)
+            if (resolved)
             {
                 OnUnresolved(infuseType, instance);
             }
@@ -138,14 +142,23 @@ namespace Infuse
         {
             UnregisterService(typeof(TServiceType), instance);
         }
+        
+        private void ServiceTypeStateUpdated(Type serviceType)
+        {               
+            foreach (var requiredType in _typeInfoMap.GetTypesRequiringService(serviceType))
+            {
+                UpdateResolvedState(requiredType);
+            }
+        }
 
-        private void UpdateResolvedState(InfuseTypeInfo infuseType)
+        private void UpdateResolvedState(Type type)
         {
+            var (infuseType, resolved) = GetInfuseType(type);
             bool nextResolved = _serviceMap.ContainsAll(infuseType.RequiredServices);
 
-            if (infuseType.Resolved != nextResolved)
+            if (resolved != nextResolved)
             {
-                infuseType.Resolved = nextResolved;
+                _typeResolvedMap.SetResolved(infuseType, nextResolved);
                 
                 if (nextResolved)
                 {
@@ -213,27 +226,26 @@ namespace Infuse
             _serviceMap.Unregister(serviceType, instance);
         }
 
-        private void ServiceTypeStateUpdated(Type serviceType)
-        {               
-            foreach (var requiredType in _typeMap.GetTypesRequiringService(serviceType))
-            {
-                UpdateResolvedState(requiredType);
-            }
-        }
-
-        private InfuseTypeInfo GetInfuseType(Type type)
+        private (InfuseTypeInfo, bool) GetInfuseType(Type type)
         {
             InfuseTypeInfo typeInfo;
             
-            if (!_typeMap.TryGetType(type, out typeInfo))
+            if (!_typeInfoMap.TryGetType(type, out typeInfo))
             {
                 typeInfo = InfuseTypeInfoUtil.CreateInfuseTypeInfo(type);
-                typeInfo.Resolved = _serviceMap.ContainsAll(typeInfo.RequiredServices);
 
-                _typeMap.Add(typeInfo);
+                _typeInfoMap.Add(typeInfo);
             }
 
-            return typeInfo;
+            bool resolved;
+            
+            if (!_typeResolvedMap.TryGetResolved(typeInfo, out resolved))
+            {
+                resolved = _serviceMap.ContainsAll(typeInfo.RequiredServices);
+                _typeResolvedMap.SetResolved(typeInfo, resolved);
+            }
+            
+            return (typeInfo, resolved);
         }
     }
 }

@@ -12,17 +12,7 @@ namespace Infuse
      */
     public static class InfuseGlobalContext
     {
-        public static InfuseContext Context
-        {
-            get
-            {
-                _context ??= GetContext();
-                
-                return _context;
-            }
-        }
-        
-        private static InfuseContext _context;
+        public static InfuseContext Context { get; private set; } = GetContext();
         
         /**
          * Registers an object instance with the Global Infuse Context.

@@ -9,7 +9,6 @@ namespace Infuse.Collections
     {
         public Type InstanceType => _instanceType;
         public bool Empty => _empty;
-        public bool Resolved { get; set; }
         
         public List<Type> ProvidedServices => _providedServices;
         public List<Type> RequiredServices => _requiredServices;
@@ -48,9 +47,6 @@ namespace Infuse.Collections
                 // This of course should never, ever happen and indicates an internal bug.
                 Debug.LogError($"Infuse: Type {instanceType} has required services but no provided services or infuse/defuse functions.");
             }
-            
-            // Any type without required services can safely be automatically considered resolved.
-            Resolved = (_requiredServices.Count == 0);
         }
         
         public void Infuse(object instance,

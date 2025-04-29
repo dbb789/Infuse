@@ -57,7 +57,7 @@ namespace Infuse.Editor
                 }
 
                 typeList.Clear();
-                typeList.AddRange(context.TypeMap.Types.OrderBy(x => x.InstanceType.FullName));
+                typeList.AddRange(context.TypeInfoMap.Types.OrderBy(x => x.InstanceType.FullName));
                 listView.RefreshItems();
             }).Every(1000);
 
