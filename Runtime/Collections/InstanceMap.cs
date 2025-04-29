@@ -23,25 +23,36 @@ namespace Infuse.Collections
 
         public void Add(Type type, object instance, IDisposable disposable = null)
         {
-            GetInstanceSet(type).Add(instance, disposable);
+            GetCreateInstanceSet(type).Add(instance, disposable);
         }
         
         public void Remove(Type type, object instance)
         {
-            GetInstanceSet(type).Remove(instance);
+            GetCreateInstanceSet(type).Remove(instance);
         }
 
         public bool Contains(Type type, object instance)
         {
-            if (_instanceMap.TryGetValue(type, out var instances))
+            if (TryGetInstanceSet(type, out var instanceSet))
             {
-                return instances.Contains(instance);
+                return instanceSet.Contains(instance);
             }
 
             return false;
         }
         
-        public InstanceSet GetInstanceSet(Type type)
+        public bool TryGetInstanceSet(Type type, out InstanceSet instanceSet)
+        {
+            return _instanceMap.TryGetValue(type, out instanceSet);
+        }
+        
+        public bool Contains(Type type)
+        {
+            return (TryGetInstanceSet(type, out var instanceSet) &&
+                    instanceSet.Count > 0);
+        }
+
+        private InstanceSet GetCreateInstanceSet(Type type)
         {
             InstanceSet instanceSet;
             
@@ -52,12 +63,6 @@ namespace Infuse.Collections
             }
 
             return instanceSet;
-        }
-
-        public bool Contains(Type type)
-        {
-            return (_instanceMap.TryGetValue(type, out var instanceList) &&
-                    instanceList.Count > 0);
         }
     }
 }

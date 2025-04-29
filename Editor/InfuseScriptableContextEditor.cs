@@ -124,9 +124,11 @@ namespace Infuse.Editor
             listView.bindItem = (element, i) =>
             {
                 var instanceType = instanceTypeList[i];
-                var instances = context.InstanceMap.GetInstanceSet(instanceType).Instances.OrderBy(x => $"{x}");
-                
-                ((InfuseInstanceListVisualElement)element).SetContent(instanceType, instances);
+
+                if (context.InstanceMap.TryGetInstanceSet(instanceType, out var instanceSet))
+                {
+                    ((InfuseInstanceListVisualElement)element).SetContent(instanceType, instanceSet.Instances.OrderBy(x => $"{x}"));
+                }
             };
             
             listView.itemsSource = instanceTypeList;

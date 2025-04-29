@@ -37,7 +37,12 @@ namespace Infuse.Editor
 
         public void SetContent(InfuseTypeInfo typeInfo, InfuseScriptableContext context)
         {
-            int instanceCount = context.InstanceMap.GetInstanceSet(typeInfo.InstanceType).Count;
+            int instanceCount = 0;
+
+            if (context.InstanceMap.TryGetInstanceSet(typeInfo.InstanceType, out var instanceSet))
+            {
+                instanceCount = instanceSet.Count;
+            }
             
             _label.text = $"{InfuseEditorUtil.GetReadableTypeName(typeInfo.InstanceType)} ({instanceCount})";
             _label.style.color = typeInfo.Resolved ? Color.green : Color.red;

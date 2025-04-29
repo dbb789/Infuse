@@ -33,20 +33,30 @@ namespace Infuse
 
         public void Dispose()
         {
+            foreach (var type in _instanceMap.Types)
+            {
+                if (_instanceMap.TryGetInstanceSet(type, out var instanceSet))
+                {
+                    if (instanceSet.Count > 0)
+                    {
+                        Debug.LogError($"Infuse: Instances of type {type} are still registered while disposing context. These will be unregistered.");
+                    }
+
+                    foreach (var instance in instanceSet)
+                    {
+                        // Will call OnDefuse() on the instance, hopefully forcing a cleanup and avoiding later errors.
+                        Unregister(instance);
+                    }
+                }
+            }
+
+            _instanceMap.Dispose();
+
             _serviceMap.Unregister(typeof(InfuseContext), this);
             _serviceMap.OnServiceTypeRegistered -= ServiceTypeStateUpdated;
             _serviceMap.OnServiceTypeUnregistered -= ServiceTypeStateUpdated;
             _serviceMap.Dispose();
 
-            foreach (var type in _instanceMap.Types)
-            {
-                if (_instanceMap.Contains(type))
-                {
-                    Debug.LogError($"Infuse: Instances of type {type} are still registered while disposing context.");
-                }
-            }
-
-            _instanceMap.Dispose();
             _typeMap.Dispose();
         }
         
@@ -149,11 +159,12 @@ namespace Infuse
 
         private void OnResolved(InfuseTypeInfo typeInfo)
         {
-            var instanceSet = _instanceMap.GetInstanceSet(typeInfo.InstanceType);
-
-            foreach (var instance in instanceSet)
+            if (_instanceMap.TryGetInstanceSet(typeInfo.InstanceType, out var instanceSet))
             {
-                OnResolved(typeInfo, instance);
+                foreach (var instance in instanceSet)
+                {
+                    OnResolved(typeInfo, instance);
+                }
             }
         }
 
@@ -172,11 +183,12 @@ namespace Infuse
         
         private void OnUnresolved(InfuseTypeInfo typeInfo)
         {
-            var instanceSet = _instanceMap.GetInstanceSet(typeInfo.InstanceType);
-
-            foreach (var instance in instanceSet)
+            if (_instanceMap.TryGetInstanceSet(typeInfo.InstanceType, out var instanceSet))
             {
-                OnUnresolved(typeInfo, instance);
+                foreach (var instance in instanceSet)
+                {
+                    OnUnresolved(typeInfo, instance);
+                }
             }
         }
 
