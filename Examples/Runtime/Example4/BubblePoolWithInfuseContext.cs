@@ -27,8 +27,9 @@ namespace Infuse.Examples
         protected override GameObject CreateInstance(GameObject prefab, Transform parent)
         {
             var go = Instantiate(prefab, parent);
+            var bubble = go.GetComponent<BubbleWithInfuseContext>();
 
-            _context.Register(go.GetComponent<BubbleWithInfuseContext>());
+            bubble.Initialize(_context);
             
             return go;
         }

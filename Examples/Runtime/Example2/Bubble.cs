@@ -18,14 +18,14 @@ namespace Infuse.Examples
         
         private void OnEnable()
         {
-            transform.localPosition = Vector3.zero;
-            _velocity = new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), 0);
-            _lifeTime = Time.time + Random.Range(2f, 3f);
-
             // We're calling Defuse() ourselves here, so pass false as a second
             // argument to disable automatically calling Defuse() on
             // MonoBehaviour destroy.
             InfuseGlobalContext.Register(this, false);
+
+            transform.localPosition = Vector3.zero;
+            _velocity = new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), 0);
+            _lifeTime = Time.time + Random.Range(2f, 3f);
         }
 
         private void OnDisable()
