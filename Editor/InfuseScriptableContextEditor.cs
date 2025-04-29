@@ -9,7 +9,7 @@ using Infuse.Collections;
 
 namespace Infuse.Editor
 {
-    [CustomEditor(typeof(InfuseScriptableContext))]
+    [CustomEditor(typeof(InfuseScriptableContext), true)]
     public class InfuseScriptableContextEditor : UnityEditor.Editor
     {
         public override VisualElement CreateInspectorGUI()

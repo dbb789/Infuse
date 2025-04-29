@@ -9,6 +9,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e2345fc9617e8a4abc9e4613f50783e, type: 3}
+  m_Script: {fileID: 11500000, guid: 52f91b3c4b8631c46b8d0c233d38f3ae, type: 3}
   m_Name: InfuseGlobalContext
   m_EditorClassIdentifier: 

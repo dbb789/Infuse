@@ -8,24 +8,11 @@ namespace Infuse
      * InfuseBaseContext to be tied to a Unity asset and viewed in the editor.
      */
     [CreateAssetMenu(menuName = "Infuse/InfuseScriptableContext", fileName = "InfuseScriptableContext")]
-    public class InfuseScriptableContext : ScriptableObject, InfuseContext
+    public abstract class InfuseScriptableContext : ScriptableObject, InfuseContext
     {
         public InfuseTypeInfoMap TypeMap => GetBaseContext().TypeMap;
         public InstanceMap InstanceMap => GetBaseContext().InstanceMap;
         public ServiceMap ServiceMap => GetBaseContext().ServiceMap;
-
-        [SerializeField]
-        private InfuseScriptableContext _parentContext = null;
-        
-        private InfuseBaseContext _baseContext;
-
-        // Unity's ScriptableObject lifetime isn't particularly clearly defined
-        // and changes between editor, player and platform. So we'll lazily
-        // initialise the context and discard it for replacement in OnDisable().
-        private void OnDisable()
-        {
-            _baseContext = null;
-        }
 
         /**
          * Register an object instance with this Infuse Context.
@@ -66,16 +53,6 @@ namespace Infuse
             GetBaseContext().UnregisterService<TServiceType>(instance);
         }
 
-        /**
-         * Invoked to lazily create the stored InfuseBaseContext. Override this
-         * to create a custom context.
-         * @return The InfuseBaseContext instance.
-         */
-        protected virtual InfuseBaseContext GetBaseContext()
-        {
-            _baseContext ??= new InfuseBaseContext(_parentContext?.ServiceMap);
-
-            return _baseContext;
-        }
+        protected abstract InfuseBaseContext GetBaseContext();
     }
 }
