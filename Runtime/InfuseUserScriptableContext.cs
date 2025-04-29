@@ -1,5 +1,4 @@
 using UnityEngine;
-using Infuse.Collections;
 
 namespace Infuse
 {
