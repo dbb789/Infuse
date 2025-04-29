@@ -12,8 +12,18 @@ namespace Infuse
      */
     public static class InfuseGlobalContext
     {
-        private static readonly InfuseContext _context = GetContext();
-
+        public static InfuseContext Context
+        {
+            get
+            {
+                _context ??= GetContext();
+                
+                return _context;
+            }
+        }
+        
+        private static InfuseContext _context;
+        
         /**
          * Registers an object instance with the Global Infuse Context.
          * @param instance The object instance to register.
@@ -21,7 +31,7 @@ namespace Infuse
          */
         public static void Register(object instance, bool unregisterOnDestroy = true)
         {
-            _context.Register(instance, unregisterOnDestroy);
+            Context.Register(instance, unregisterOnDestroy);
         }
 
         /**
@@ -30,7 +40,7 @@ namespace Infuse
          */
         public static void Unregister(object instance)
         {
-            _context.Unregister(instance);
+            Context.Unregister(instance);
         }
 
         /**
@@ -40,7 +50,7 @@ namespace Infuse
          */
         public static void RegisterService<TServiceType>(object instance) where TServiceType : class
         {
-            _context.RegisterService<TServiceType>(instance);
+            Context.RegisterService<TServiceType>(instance);
         }
 
         /**
@@ -50,12 +60,11 @@ namespace Infuse
          */
         public static void UnregisterService<TServiceType>(object instance) where TServiceType : class
         {
-            _context.UnregisterService<TServiceType>(instance);
+            Context.UnregisterService<TServiceType>(instance);
         }
 
-        public static InfuseContext GetContext()
+        private static InfuseContext GetContext()
         {
-            Debug.Log("Infuse: Getting Global Infuse Context.");
             var context = Resources.Load<InfuseScriptableContext>("InfuseGlobalContext");
 
             if (context == null)
