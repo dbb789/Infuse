@@ -6,8 +6,10 @@ using System.Reflection;
 using UnityEngine;
 using Infuse.Collections;
 using Infuse.Common;
+using Infuse.TypeInfo;
+using Infuse.Util;
 
-namespace Infuse.Util
+namespace Infuse.TypeInfo
 {
     public static class InfuseTypeInfoUtil
     {

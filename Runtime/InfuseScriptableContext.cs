@@ -1,5 +1,6 @@
 using UnityEngine;
 using Infuse.Collections;
+using Infuse.TypeInfo;
 
 namespace Infuse
 {
@@ -9,8 +10,7 @@ namespace Infuse
      */
     public abstract class InfuseScriptableContext : ScriptableObject, InfuseContext
     {
-        public InfuseTypeInfoMap TypeInfoMap => GetBaseContext().TypeInfoMap;
-        public InfuseTypeResolvedMap TypeResolvedMap => GetBaseContext().TypeResolvedMap;
+        public InfuseTypeEntryMap TypeEntryMap => GetBaseContext().TypeEntryMap;
         public InstanceMap InstanceMap => GetBaseContext().InstanceMap;
         public ServiceMap ServiceMap => GetBaseContext().ServiceMap;
 

@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Infuse.Collections;
 
-namespace Infuse.Collections
+namespace Infuse.TypeInfo
 {
     public class OnInfuseFunc
     {

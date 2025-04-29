@@ -6,6 +6,7 @@ using UnityEngine.UIElements;
 using UnityEditor;
 using UnityEditor.UIElements;
 using Infuse.Collections;
+using Infuse.TypeInfo;
 
 namespace Infuse.Editor
 {
@@ -38,13 +39,13 @@ namespace Infuse.Editor
             };
 
             var context = (InfuseScriptableContext)target;
-            var typeList = new List<InfuseTypeInfo>();
+            var typeList = new List<InfuseTypeEntry>();
             
-            listView.makeItem = () => new InfuseTypeInfoVisualElement();
+            listView.makeItem = () => new InfuseTypeEntryVisualElement();
         
             listView.bindItem = (element, i) =>
             {
-                ((InfuseTypeInfoVisualElement)element).SetContent(typeList[i], context);
+                ((InfuseTypeEntryVisualElement)element).SetContent(typeList[i], context);
             };
             
             listView.itemsSource = typeList;
@@ -57,7 +58,7 @@ namespace Infuse.Editor
                 }
 
                 typeList.Clear();
-                typeList.AddRange(context.TypeInfoMap.Types.OrderBy(x => x.InstanceType.FullName));
+                typeList.AddRange(context.TypeEntryMap.Entries.OrderBy(x => x.TypeInfo.InstanceType.FullName));
                 listView.RefreshItems();
             }).Every(1000);
 

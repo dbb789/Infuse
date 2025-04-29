@@ -1,16 +1,17 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using Infuse.Collections;
+using Infuse.TypeInfo;
 
 namespace Infuse.Editor
 {
-    public class InfuseTypeInfoVisualElement : VisualElement
+    public class InfuseTypeEntryVisualElement : VisualElement
     {
         private Label _label;
         private VisualElement _requiredServicesList;
         private VisualElement _providedServicesList;
         
-        public InfuseTypeInfoVisualElement()
+        public InfuseTypeEntryVisualElement()
         {
             var root = new VisualElement();
             
@@ -35,26 +36,18 @@ namespace Infuse.Editor
             Add(root);
         }
 
-        public void SetContent(InfuseTypeInfo typeInfo, InfuseScriptableContext context)
+        public void SetContent(InfuseTypeEntry typeEntry, InfuseScriptableContext context)
         {
+            var typeInfo = typeEntry.TypeInfo;
             int instanceCount = 0;
-
+            
             if (context.InstanceMap.TryGetInstanceSet(typeInfo.InstanceType, out var instanceSet))
             {
                 instanceCount = instanceSet.Count;
             }
             
             _label.text = $"{InfuseEditorUtil.GetReadableTypeName(typeInfo.InstanceType)} ({instanceCount})";
-
-            if (context.TypeResolvedMap.TryGetResolved(typeInfo, out var resolved))
-            {
-                _label.style.color = resolved ? Color.green : Color.red;
-            }
-            else
-            {
-                // Shouldn't happen.
-                _label.style.color = Color.yellow;
-            }
+            _label.style.color = typeEntry.Resolved ? Color.green : Color.red;
             
             _requiredServicesList.Clear();
             

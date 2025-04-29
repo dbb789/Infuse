@@ -2,29 +2,29 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Infuse.Collections;
+using Infuse.TypeInfo;
 using Infuse.Util;
 
 namespace Infuse
 {
     public class InfuseBaseContext : InfuseContext, IDisposable
     {
-        public InfuseTypeInfoMap TypeInfoMap => _typeInfoMap;
-        public InfuseTypeResolvedMap TypeResolvedMap => _typeResolvedMap;
+        public InfuseTypeEntryMap TypeEntryMap => _typeEntryMap;
         public ServiceMap ServiceMap => _serviceMap;
         public InstanceMap InstanceMap => _instanceMap;
-        
-        private readonly InfuseTypeInfoMap _typeInfoMap;
-        private readonly InfuseTypeResolvedMap _typeResolvedMap;
+
+        private readonly InfuseTypeInfoCache _typeInfoCache;
+        private readonly InfuseTypeEntryMap _typeEntryMap;
         private readonly ServiceMap _serviceMap;
         private readonly InstanceMap _instanceMap;
         private readonly Action<object> _destroyCancellationCallback;
         private readonly Action<InfuseTypeInfo, object> _onInfuseCompleted;
         
-        public InfuseBaseContext(InfuseTypeInfoMap typeInfoMap,
+        public InfuseBaseContext(InfuseTypeInfoCache typeInfoCache,
                                  ServiceMap parentServiceMap = null)
         {
-            _typeInfoMap = typeInfoMap;
-            _typeResolvedMap = new();
+            _typeInfoCache = typeInfoCache;
+            _typeEntryMap = new();
             _serviceMap = new(parentServiceMap);
             _instanceMap = new();
             _destroyCancellationCallback = (instance) => Unregister(instance);
@@ -62,7 +62,7 @@ namespace Infuse
             _serviceMap.OnServiceTypeUnregistered -= ServiceTypeStateUpdated;
             _serviceMap.Dispose();
 
-            _typeInfoMap.Dispose();
+            _typeEntryMap.Dispose();
         }
         
         public void Register(object instance, bool unregisterOnDestroy = true)
@@ -73,11 +73,11 @@ namespace Infuse
             }
 
             var type = instance.GetType();
-            var (infuseType, resolved) = GetInfuseType(type);
+            var typeEntry = GetTypeEntry(type);
 
             // This type has no interaction with Infuse and can be ignored. See
             // also InfuseTypeInfo.cs.
-            if (infuseType.Empty)
+            if (typeEntry.TypeInfo.Empty)
             {
                 return;
             }
@@ -97,9 +97,9 @@ namespace Infuse
 
             _instanceMap.Add(type, instance, disposable);
             
-            if (resolved)
+            if (typeEntry.Resolved)
             {
-                OnResolved(infuseType, instance);
+                OnResolved(typeEntry.TypeInfo, instance);
             }
         }
 
@@ -111,10 +111,10 @@ namespace Infuse
             }
 
             var type = instance.GetType();
-            var (infuseType, resolved) = GetInfuseType(type);
+            var typeEntry = GetTypeEntry(type);
 
             // As above.
-            if (infuseType.Empty)
+            if (typeEntry.TypeInfo.Empty)
             {
                 return;
             }
@@ -125,9 +125,9 @@ namespace Infuse
                 return;
             }
             
-            if (resolved)
+            if (typeEntry.Resolved)
             {
-                OnUnresolved(infuseType, instance);
+                OnUnresolved(typeEntry.TypeInfo, instance);
             }
 
             _instanceMap.Remove(type, instance);
@@ -145,7 +145,7 @@ namespace Infuse
         
         private void ServiceTypeStateUpdated(Type serviceType)
         {               
-            foreach (var requiredType in _typeInfoMap.GetTypesRequiringService(serviceType))
+            foreach (var requiredType in _typeInfoCache.GetTypesRequiringService(serviceType))
             {
                 UpdateResolvedState(requiredType);
             }
@@ -153,20 +153,20 @@ namespace Infuse
 
         private void UpdateResolvedState(Type type)
         {
-            var (infuseType, resolved) = GetInfuseType(type);
-            bool nextResolved = _serviceMap.ContainsAll(infuseType.RequiredServices);
+            var typeEntry = GetTypeEntry(type);
+            bool nextResolved = _serviceMap.ContainsAll(typeEntry.TypeInfo.RequiredServices);
 
-            if (resolved != nextResolved)
+            if (typeEntry.Resolved != nextResolved)
             {
-                _typeResolvedMap.SetResolved(infuseType, nextResolved);
+                typeEntry.Resolved = nextResolved;
                 
                 if (nextResolved)
                 {
-                    OnResolved(infuseType);
+                    OnResolved(typeEntry.TypeInfo);
                 }
                 else
                 {
-                    OnUnresolved(infuseType);
+                    OnUnresolved(typeEntry.TypeInfo);
                 }
             }
         }
@@ -226,26 +226,21 @@ namespace Infuse
             _serviceMap.Unregister(serviceType, instance);
         }
 
-        private (InfuseTypeInfo, bool) GetInfuseType(Type type)
+        private InfuseTypeEntry GetTypeEntry(Type type)
         {
-            InfuseTypeInfo typeInfo;
+            InfuseTypeEntry typeEntry;
             
-            if (!_typeInfoMap.TryGetType(type, out typeInfo))
+            if (!_typeEntryMap.TryGetTypeEntry(type, out typeEntry))
             {
-                typeInfo = InfuseTypeInfoUtil.CreateInfuseTypeInfo(type);
-
-                _typeInfoMap.Add(typeInfo);
+                var typeInfo = _typeInfoCache.GetTypeInfo(type);
+                
+                typeEntry = new InfuseTypeEntry(typeInfo);
+                typeEntry.Resolved = _serviceMap.ContainsAll(typeInfo.RequiredServices);
+                
+                _typeEntryMap.Add(typeEntry);
             }
 
-            bool resolved;
-            
-            if (!_typeResolvedMap.TryGetResolved(typeInfo, out resolved))
-            {
-                resolved = _serviceMap.ContainsAll(typeInfo.RequiredServices);
-                _typeResolvedMap.SetResolved(typeInfo, resolved);
-            }
-            
-            return (typeInfo, resolved);
+            return typeEntry;
         }
     }
 }

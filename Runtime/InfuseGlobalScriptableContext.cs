@@ -1,5 +1,6 @@
 using UnityEngine;
 using Infuse.Collections;
+using Infuse.TypeInfo;
 
 namespace Infuse
 {
@@ -18,7 +19,7 @@ namespace Infuse
         
         protected override InfuseBaseContext GetBaseContext()
         {
-            _baseContext ??= new InfuseBaseContext(InfuseTypeInfoMap.GlobalInstance);
+            _baseContext ??= new InfuseBaseContext(InfuseTypeInfoCache.GlobalInstance);
 
             return _baseContext;
         }

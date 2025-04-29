@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace Infuse.Collections
+namespace Infuse.TypeInfo
 {
-    public class InfuseTypeInfoMap : IDisposable
+    public class InfuseTypeInfoCache
     {
         // InfuseTypeInfoMap is populated with InfuseTypeInfo instances that are
         // immutable and are generated purely using static type data via
@@ -13,26 +13,33 @@ namespace Infuse.Collections
         // guaranteed to be identical, and as such we can safely default to a
         // global instance of this class to avoid the costly overhead of
         // regenerating the same InfuseTypeInfo instances over and over again.
-        public static InfuseTypeInfoMap GlobalInstance { get; private set; } = new InfuseTypeInfoMap();
+        public static InfuseTypeInfoCache GlobalInstance { get; private set; } = new();
         
         public IEnumerable<InfuseTypeInfo> Types => _typeInfoMap?.Values ?? Enumerable.Empty<InfuseTypeInfo>();
         
         private Dictionary<Type, InfuseTypeInfo> _typeInfoMap;
         private Dictionary<Type, List<Type>> _requiresServiceMap;
 
-        public InfuseTypeInfoMap()
+        public InfuseTypeInfoCache()
         {
             _typeInfoMap = new Dictionary<Type, InfuseTypeInfo>();
             _requiresServiceMap = new Dictionary<Type, List<Type>>();
         }
 
-        public void Dispose()
+        public InfuseTypeInfo GetTypeInfo(Type instanceType)
         {
-            _typeInfoMap.Clear();
-            _requiresServiceMap.Clear();
-        }
+            InfuseTypeInfo typeInfo;
+                
+            if (!_typeInfoMap.TryGetValue(instanceType, out typeInfo))
+            {
+                typeInfo = InfuseTypeInfoUtil.CreateInfuseTypeInfo(instanceType);
+                Add(typeInfo);
+            }
 
-        public void Add(InfuseTypeInfo typeInfo)
+            return typeInfo;
+        }
+        
+        private void Add(InfuseTypeInfo typeInfo)
         {
             if (typeInfo == null)
             {
@@ -62,11 +69,6 @@ namespace Infuse.Collections
             }
         }
         
-        public bool TryGetType(Type instanceType, out InfuseTypeInfo typeInfo)
-        {
-            return _typeInfoMap.TryGetValue(instanceType, out typeInfo);
-        }
-
         public List<Type> GetTypesRequiringService(Type instanceType)
         {
             if (_requiresServiceMap.TryGetValue(instanceType, out var infuseTypes))
