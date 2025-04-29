@@ -36,6 +36,8 @@ namespace Infuse.Collections
                 _parent.OnServiceTypeUnregistered -= InvokeServiceTypeUnregistered;
                 _parent = null;
             }
+
+            _serviceMap.Clear();
         }
 
         public void Register(Type type, object instance)

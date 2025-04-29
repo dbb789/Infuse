@@ -25,17 +25,29 @@ namespace Infuse
             _instanceMap = new();
             _destroyCancellationCallback = (instance) => Unregister(instance);
             _onInfuseCompleted = OnInfuseCompleted;
-
-            _serviceMap.Register(typeof(InfuseContext), this);
+            
             _serviceMap.OnServiceTypeRegistered += ServiceTypeStateUpdated;
             _serviceMap.OnServiceTypeUnregistered += ServiceTypeStateUpdated;
+            _serviceMap.Register(typeof(InfuseContext), this);
         }
 
         public void Dispose()
         {
+            _serviceMap.Unregister(typeof(InfuseContext), this);
             _serviceMap.OnServiceTypeRegistered -= ServiceTypeStateUpdated;
             _serviceMap.OnServiceTypeUnregistered -= ServiceTypeStateUpdated;
             _serviceMap.Dispose();
+
+            foreach (var type in _instanceMap.Types)
+            {
+                if (_instanceMap.Contains(type))
+                {
+                    Debug.LogError($"Infuse: Instances of type {type} are still registered while disposing context.");
+                }
+            }
+
+            _instanceMap.Dispose();
+            _typeMap.Dispose();
         }
         
         public void Register(object instance, bool unregisterOnDestroy = true)

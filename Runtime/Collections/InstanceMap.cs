@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Infuse.Collections
 {
-    public class InstanceMap
+    public class InstanceMap : IDisposable
     {
         public IEnumerable<Type> Types => _instanceMap?.Keys ?? Enumerable.Empty<Type>();
         
@@ -14,6 +14,11 @@ namespace Infuse.Collections
         public InstanceMap()
         {
             _instanceMap = new Dictionary<Type, InstanceSet>();
+        }
+
+        public void Dispose()
+        {
+            _instanceMap.Clear();
         }
 
         public void Add(Type type, object instance, IDisposable disposable = null)

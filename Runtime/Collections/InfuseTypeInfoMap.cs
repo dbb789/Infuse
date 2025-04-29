@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Infuse.Collections
 {
-    public class InfuseTypeInfoMap
+    public class InfuseTypeInfoMap : IDisposable
     {
         public IEnumerable<InfuseTypeInfo> Types => _typeInfoMap?.Values ?? Enumerable.Empty<InfuseTypeInfo>();
         
@@ -16,6 +16,12 @@ namespace Infuse.Collections
         {
             _typeInfoMap = new Dictionary<Type, InfuseTypeInfo>();
             _requiresServiceMap = new Dictionary<Type, List<InfuseTypeInfo>>();
+        }
+
+        public void Dispose()
+        {
+            _typeInfoMap.Clear();
+            _requiresServiceMap.Clear();
         }
 
         public void Add(InfuseTypeInfo typeInfo)
