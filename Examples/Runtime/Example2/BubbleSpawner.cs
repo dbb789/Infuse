@@ -10,7 +10,7 @@ namespace Infuse.Examples
         
         private void Awake()
         {
-            InfuseManager.Register(this);
+            InfuseGlobalContext.Register(this);
         }
 
         // Ensures that Update() will never be called when BubblePool isn't

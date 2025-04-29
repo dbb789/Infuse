@@ -8,12 +8,12 @@ namespace Infuse.Examples
     {
         private void OnEnable()
         {
-            InfuseManager.RegisterService<InfuseServiceCollection<Camera>>(GetComponent<Camera>());
+            InfuseGlobalContext.RegisterService<InfuseServiceCollection<Camera>>(GetComponent<Camera>());
         }
 
         private void OnDisable()
         {
-            InfuseManager.UnregisterService<InfuseServiceCollection<Camera>>(GetComponent<Camera>());
+            InfuseGlobalContext.UnregisterService<InfuseServiceCollection<Camera>>(GetComponent<Camera>());
         }
     }
 }

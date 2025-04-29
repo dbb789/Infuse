@@ -25,12 +25,12 @@ namespace Infuse.Examples
             // We're calling Defuse() ourselves here, so pass false as a second
             // argument to disable automatically calling Defuse() on
             // MonoBehaviour destroy.
-            InfuseManager.Register(this, false);
+            InfuseGlobalContext.Register(this, false);
         }
 
         private void OnDisable()
         {
-            InfuseManager.Unregister(this);
+            InfuseGlobalContext.Unregister(this);
         }
         
         private void Update()

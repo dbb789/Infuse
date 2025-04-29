@@ -6,13 +6,13 @@ using Infuse.Common;
 namespace Infuse
 {
     /**
-     * InfuseManager is a static convenience class that provides methods to
+     * InfuseGlobalContext is a static convenience class that provides methods to
      * register and unregister object instances and services with the Global
      * Infuse Context.
      */
-    public static class InfuseManager
+    public static class InfuseGlobalContext
     {
-        private static readonly InfuseContext _context = GetGlobalContext();
+        private static readonly InfuseContext _context = GetContext();
 
         /**
          * Registers an object instance with the Global Infuse Context.
@@ -53,8 +53,9 @@ namespace Infuse
             _context.UnregisterService<TServiceType>(instance);
         }
 
-        private static InfuseContext GetGlobalContext()
+        public static InfuseContext GetContext()
         {
+            Debug.Log("Infuse: Getting Global Infuse Context.");
             var context = Resources.Load<InfuseScriptableContext>("InfuseGlobalContext");
 
             if (context == null)

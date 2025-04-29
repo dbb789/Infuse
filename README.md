@@ -71,7 +71,7 @@ namespace Infuse
 }
 ```
 
-Given that the vast majority of projects only require one context, a global context bound to a ScriptableObject is stored within ```InfuseManager``` and wrapped using static methods. This is purely for developer convenience, and we'll use it in the examples below.
+Given that the vast majority of projects only require one context, a global context bound to a ScriptableObject is stored within ```InfuseGlobalContext``` and wrapped using static methods. This is purely for developer convenience, and we'll use it in the examples below.
 
 
 ## Basic Usage Example
@@ -92,10 +92,10 @@ public class ExampleService : MonoBehaviour, IExampleService, InfuseAs<IExampleS
     private void Awake()
     {
         // Register this object with the default context.
-        InfuseManager.Register(this);
+        InfuseGlobalContext.Register(this);
     }
     
-    // As this object has no dependencies, this method is immediately invoked via InfuseManager.Register(this).
+    // As this object has no dependencies, this method is immediately invoked via InfuseGlobalContext.Register(this).
     private void OnInfuse()
     {
         // Service starting.
@@ -116,7 +116,7 @@ public class ExampleClient : MonoBehaviour
     private void Awake()
     {
         // Register this object with the default context.
-        InfuseManager.Register(this);
+        InfuseGlobalContext.Register(this);
     }
 
     // Called after ExampleService.OnInfuse() due to the dependency declared as an argument in the method.
@@ -137,9 +137,9 @@ You'll immediately notice that both these classes have two member functions - ``
 
 This means that we can have a complex hierarchy of interdependant components within a scene (or multiple scenes) or within prefabs, and they will automatically be started when their dependencies become available, and stopped when their dependencies become unavailable. This behaviour works on-the-fly even when adding or removing components manually in play mode within the editor.
 
-```InfuseManager.Register(this)``` simply registers an object with the built-in default Infuse Context object. It can be invoked at any time, and an object can be unregistered with the ```InfuseManager.Unregister(...)``` call.
+```InfuseGlobalContext.Register(this)``` simply registers an object with the built-in default Infuse Context object. It can be invoked at any time, and an object can be unregistered with the ```InfuseGlobalContext.Unregister(...)``` call.
 
-In addition, the Infuse Context automatically unregisters a MonoBehaviour when it's destroyCancellationToken is triggered. This means that a MonoBehaviour object will automatically be unregistered when it is destroyed and calling ```InfuseManager.Unregister(this)``` in ```OnDestroy()``` is unnecessary. However this behaviour can be disabled if necessary.
+In addition, the Infuse Context automatically unregisters a MonoBehaviour when it's destroyCancellationToken is triggered. This means that a MonoBehaviour object will automatically be unregistered when it is destroyed and calling ```InfuseGlobalContext.Unregister(this)``` in ```OnDestroy()``` is unnecessary. However this behaviour can be disabled if necessary.
 
 
 ## Unity 6 Awaitable Support
@@ -154,10 +154,10 @@ public class ExampleService : MonoBehaviour, InfuseAs<ExampleService>
     private void Awake()
     {
         // Register this object with the default context.
-        InfuseManager.Register(this);
+        InfuseGlobalContext.Register(this);
     }
     
-    // As this object has no dependencies, this method is immediately invoked via InfuseManager.Register(this).
+    // As this object has no dependencies, this method is immediately invoked via InfuseGlobalContext.Register(this).
     private async Awaitable OnInfuse()
     {
         // Service starting.
@@ -188,7 +188,7 @@ public class ExampleService : MonoBehaviour, InfuseAs<InfuseServiceCollection<Ex
 {
     private void Awake()
     {
-        InfuseManager.Register(this);
+        InfuseGlobalContext.Register(this);
     }
 }
 ```
@@ -200,7 +200,7 @@ public class ExampleClient : MonoBehaviour
 {
     private void Awake()
     {
-        InfuseManager.Register(this);
+        InfuseGlobalContext.Register(this);
     }
 
     private void OnInfuse(InfuseServiceCollection<ExampleService> exampleServiceCollection)
@@ -230,17 +230,17 @@ public class RegisterCamera : MonoBehaviour
 {
     private void OnEnable()
     {
-        InfuseManager.RegisterService<InfuseServiceCollection<Camera>>(GetComponent<Camera>());
+        InfuseGlobalContext.RegisterService<InfuseServiceCollection<Camera>>(GetComponent<Camera>());
     }
 
     private void OnDisable()
     {
-        InfuseManager.UnregisterService<InfuseServiceCollection<Camera>>(GetComponent<Camera>());
+        InfuseGlobalContext.UnregisterService<InfuseServiceCollection<Camera>>(GetComponent<Camera>());
     }
 }
 ```
 
-In this case, ```InfuseManager.RegisterService()``` and ```InfuseManager.UnregisterService()``` are distinctly different to ```InfuseManager.Register()``` and ```InfuseManager.Diffuse()``` in that they do not directly register / unregister the Camera object with Infuse, but they do add it to an ```InfuseServiceCollection<Camera>```, which allows another component to query for the collection of cameras as in the previous example.
+In this case, ```InfuseGlobalContext.RegisterService()``` and ```InfuseGlobalContext.UnregisterService()``` are distinctly different to ```InfuseGlobalContext.Register()``` and ```InfuseGlobalContext.Unregister()``` in that they do not directly register / unregister the Camera object with Infuse, but they do add it to an ```InfuseServiceCollection<Camera>```, which allows another component to query for the collection of cameras as in the previous example.
 
 This example is implemented in full in ExampleScene3, which is bundled with the Infuse package in the Examples directory.
 
