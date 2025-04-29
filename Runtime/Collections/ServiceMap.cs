@@ -6,17 +6,36 @@ using Infuse.Util;
 
 namespace Infuse.Collections
 {
-    public class ServiceMap
+    public class ServiceMap : IDisposable
     {
         public IEnumerable<KeyValuePair<Type, object>> Services => _serviceMap;
         
         private Dictionary<Type, object> _serviceMap;
         private ServiceMap _parent;
+
+        public event Action<Type> OnServiceTypeRegistered;
+        public event Action<Type> OnServiceTypeUnregistered;
         
         public ServiceMap(ServiceMap parent = null)
         {
             _serviceMap = new Dictionary<Type, object>();
             _parent = parent;
+
+            if (_parent != null)
+            {
+                _parent.OnServiceTypeRegistered += InvokeServiceTypeRegistered;
+                _parent.OnServiceTypeUnregistered += InvokeServiceTypeUnregistered;
+            }
+        }
+
+        public void Dispose()
+        {
+            if (_parent != null)
+            {
+                _parent.OnServiceTypeRegistered -= InvokeServiceTypeRegistered;
+                _parent.OnServiceTypeUnregistered -= InvokeServiceTypeUnregistered;
+                _parent = null;
+            }
         }
 
         public void Register(Type type, object instance)
@@ -29,7 +48,7 @@ namespace Infuse.Collections
                 }
 
                 Debug.Log($"Infuse: Registering service of type {type}.");
-                _serviceMap.Add(type, instance);
+                RegisterServiceType(type, instance);
             }
             else if (typeof(ServiceContainer).IsAssignableFrom(type))
             {
@@ -52,7 +71,7 @@ namespace Infuse.Collections
                 // throwing and the container is confirmed to be populated.
                 if (toAdd && container.Populated)
                 {
-                    _serviceMap.Add(type, container);
+                    RegisterServiceType(type, container);
                 }
             }
             else
@@ -76,7 +95,7 @@ namespace Infuse.Collections
                 }
                 
                 Debug.Log($"Infuse: Unregistering service of type {type}.");
-                _serviceMap.Remove(type);
+                UnregisterServiceType(type);
             }
             else if (typeof(ServiceContainer).IsAssignableFrom(type))
             {
@@ -85,11 +104,11 @@ namespace Infuse.Collections
                     var container = (ServiceContainer)existing;
                     
                     container.Unregister(instance);
-
+                    
                     // Remove unpopulated container.
                     if (!container.Populated)
                     {
-                        _serviceMap.Remove(type);
+                        UnregisterServiceType(type);
                     }
                 }
                 else
@@ -144,6 +163,28 @@ namespace Infuse.Collections
             }
             
             throw new InfuseException($"Service of type {type} is not registered.");
+        }
+
+        private void RegisterServiceType(Type type, object instance)
+        {
+            _serviceMap.Add(type, instance);
+            InvokeServiceTypeRegistered(type);
+        }
+
+        private void UnregisterServiceType(Type type)
+        {
+            _serviceMap.Remove(type);
+            InvokeServiceTypeUnregistered(type);
+        }
+
+        private void InvokeServiceTypeRegistered(Type type)
+        {
+            OnServiceTypeRegistered?.Invoke(type);
+        }
+
+        private void InvokeServiceTypeUnregistered(Type type)
+        {
+            OnServiceTypeUnregistered?.Invoke(type);
         }
     }
 }

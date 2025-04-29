@@ -6,7 +6,7 @@ using Infuse.Util;
 
 namespace Infuse
 {
-    public class InfuseBaseContext : InfuseContext
+    public class InfuseBaseContext : InfuseContext, IDisposable
     {
         public InfuseTypeInfoMap TypeMap => _typeMap;
         public ServiceMap ServiceMap => _serviceMap;
@@ -27,6 +27,15 @@ namespace Infuse
             _onInfuseCompleted = OnInfuseCompleted;
 
             _serviceMap.Register(typeof(InfuseContext), this);
+            _serviceMap.OnServiceTypeRegistered += ServiceTypeStateUpdated;
+            _serviceMap.OnServiceTypeUnregistered += ServiceTypeStateUpdated;
+        }
+
+        public void Dispose()
+        {
+            _serviceMap.OnServiceTypeRegistered -= ServiceTypeStateUpdated;
+            _serviceMap.OnServiceTypeUnregistered -= ServiceTypeStateUpdated;
+            _serviceMap.Dispose();
         }
         
         public void Register(object instance, bool unregisterOnDestroy = true)
@@ -172,17 +181,15 @@ namespace Infuse
         private void RegisterService(Type serviceType, object instance)
         {
             _serviceMap.Register(serviceType, instance);
-            
-            foreach (var requiredType in _typeMap.GetTypesRequiringService(serviceType))
-            {
-                UpdateResolvedState(requiredType);
-            }
         }
 
         private void UnregisterService(Type serviceType, object instance)
         {
             _serviceMap.Unregister(serviceType, instance);
-            
+        }
+
+        private void ServiceTypeStateUpdated(Type serviceType)
+        {               
             foreach (var requiredType in _typeMap.GetTypesRequiringService(serviceType))
             {
                 UpdateResolvedState(requiredType);
