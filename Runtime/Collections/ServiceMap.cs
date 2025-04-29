@@ -50,6 +50,7 @@ namespace Infuse.Collections
                 }
 
                 Debug.Log($"Infuse: Registering service of type {type}.");
+                
                 RegisterServiceType(type, instance);
             }
             else if (typeof(ServiceContainer).IsAssignableFrom(type))
@@ -97,6 +98,7 @@ namespace Infuse.Collections
                 }
                 
                 Debug.Log($"Infuse: Unregistering service of type {type}.");
+                
                 UnregisterServiceType(type);
             }
             else if (typeof(ServiceContainer).IsAssignableFrom(type))
