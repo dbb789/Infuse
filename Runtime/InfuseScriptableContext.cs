@@ -7,7 +7,6 @@ namespace Infuse
      * InfuseScriptableContext is a ScriptableObject that wraps an
      * InfuseBaseContext to be tied to a Unity asset and viewed in the editor.
      */
-    [CreateAssetMenu(menuName = "Infuse/InfuseScriptableContext", fileName = "InfuseScriptableContext")]
     public abstract class InfuseScriptableContext : ScriptableObject, InfuseContext
     {
         public InfuseTypeInfoMap TypeMap => GetBaseContext().TypeMap;
