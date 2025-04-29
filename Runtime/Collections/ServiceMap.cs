@@ -15,7 +15,7 @@ namespace Infuse.Collections
 
         public event Action<Type> OnServiceTypeRegistered;
         public event Action<Type> OnServiceTypeUnregistered;
-        
+
         public ServiceMap(ServiceMap parent = null)
         {
             _serviceMap = new Dictionary<Type, object>();

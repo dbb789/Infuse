@@ -44,7 +44,8 @@ namespace Infuse
 
                     foreach (var instance in instanceSet)
                     {
-                        // Will call OnDefuse() on the instance, hopefully forcing a cleanup and avoiding later errors.
+                        // Will call OnDefuse() on the instance, hopefully
+                        // forcing a cleanup and avoiding later errors.
                         Unregister(instance);
                     }
                 }
