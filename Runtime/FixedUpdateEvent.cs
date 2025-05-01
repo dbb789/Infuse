@@ -3,9 +3,9 @@ using Infuse.Collections;
 
 namespace Infuse
 {
-    public class UpdateEvent : InstanceTraversalEvent, IUpdateEvent, InfuseAs<IUpdateEvent>
+    public class FixedUpdateEvent : InstanceTraversalEvent, IFixedUpdateEvent, InfuseAs<IFixedUpdateEvent>
     {
-        private void Update()
+        private void FixedUpdate()
         {
             if (InstanceTraversalList == null)
             {
