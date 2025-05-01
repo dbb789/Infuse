@@ -25,7 +25,21 @@ namespace Infuse.Examples
             // several unnecessary allocations later.
             _updateAction = UpdateEvent;
         }
+        
+        private void OnEnable()
+        {
+            transform.localPosition = Vector3.zero;
+            _velocity = new Vector3(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f), 0);
+            _lifeTime = Time.time + UnityEngine.Random.Range(2f, 3f);
 
+            _context.Register(this, false);
+        }
+
+        private void OnDisable()
+        {
+            _context.Unregister(this);
+        }
+        
         private void OnInfuse(ISimplePool parentPool,
                               IBubbleCounterService bubbleCounter,
                               IUpdateEvent updateEvent)
@@ -47,20 +61,6 @@ namespace Infuse.Examples
             _bubbleCounter = null;
         }
 
-        private void OnEnable()
-        {
-            transform.localPosition = Vector3.zero;
-            _velocity = new Vector3(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f), 0);
-            _lifeTime = Time.time + UnityEngine.Random.Range(2f, 3f);
-
-            _context.Register(this, false);
-        }
-
-        private void OnDisable()
-        {
-            _context.Unregister(this);
-        }
-        
         private void UpdateEvent()
         {
             transform.position += _velocity * Time.deltaTime;
