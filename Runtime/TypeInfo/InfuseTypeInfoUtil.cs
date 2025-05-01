@@ -69,8 +69,8 @@ namespace Infuse.TypeInfo
                 baseType = baseType.BaseType;
             }
 
-            var onInfuseFunc = CreateOnInfuseFunc(type, infuseMethod);
-            var onDefuseFunc = CreateOnDefuseFunc(type, defuseMethod);
+            var onInfuseFunc = OnInfuseFuncUtil.Create(type, infuseMethod);
+            var onDefuseFunc = OnDefuseFuncUtil.Create(type, defuseMethod);
 
             return new InfuseTypeInfo(type,
                                       provides.AsEnumerable<Type>(),
@@ -93,237 +93,32 @@ namespace Infuse.TypeInfo
             
             foreach (var method in methods)
             {
-                if (method.Name == "OnInfuse")
+                if (OnInfuseFuncUtil.ValidateMethod(method))
                 {
-                    if (ValidateOnInfuseMethod(method))
+                    if (infuseMethod == null)
                     {
-                        if (infuseMethod == null)
-                        {
-                            infuseMethod = method;
-                        }
-                        else
-                        {
-                            Debug.LogError($"Infuse: Multiple OnInfuse methods found in {type}: {infuseMethod} and {method}");
-                        }
+                        infuseMethod = method;
+                    }
+                    else
+                    {
+                        Debug.LogError($"Infuse: Multiple OnInfuse methods found in {type}: {infuseMethod} and {method}");
                     }
                 }
                 
-                if (method.Name == "OnDefuse")
+                if (OnDefuseFuncUtil.ValidateMethod(method))
                 {
-                    if (ValidateOnDefuseMethod(method))
+                    if (defuseMethod == null)
                     {
-                        if (defuseMethod == null)
-                        {
-                            defuseMethod = method;
-                        }
-                        else
-                        {
-                            // I can't see how this could actually happen but
-                            // just in case.
-                            Debug.LogError($"Infuse: Multiple OnDefuse methods found in {type}: {defuseMethod} and {method}");
-                        }
+                        defuseMethod = method;
+                    }
+                    else
+                    {
+                        // I can't see how this could actually happen but
+                        // just in case.
+                        Debug.LogError($"Infuse: Multiple OnDefuse methods found in {type}: {defuseMethod} and {method}");
                     }
                 }
             }
-        }
-
-        private static OnInfuseFunc CreateOnInfuseFunc(Type type, MethodInfo method)
-        {
-            if (method == null)
-            {
-                return OnInfuseFunc.Null;
-            }
-            
-            if (method.ReturnType == typeof(Awaitable))
-            {
-                return CreateAsyncOnInfuseFunc(type, method);
-            }
-
-            return CreateSyncOnInfuseFunc(type, method);
-        }
-
-        public static OnInfuseFunc CreateSyncOnInfuseFunc(Type type, MethodInfo method)
-        {
-            var dependencies = new HashSet<Type>();
-            var parameterTypeArray = CreateParameterTypeArray(method, dependencies);
-
-            // Builds a lambda expression that looks something like;
-            // (instance, serviceMap) => ((Type)instance).OnInfuse((Type1)serviceMap.GetService(typeof(Type1)),
-            //                                                     (Type2)serviceMap.GetService(typeof(Type2)))
-            
-            var instanceParameter = Expression.Parameter(typeof(object), "instance");
-            var serviceMapParameter = Expression.Parameter(typeof(ServiceMap), "serviceMap");
-            var invokeExpression = Expression.Lambda<Action<object, ServiceMap>>(
-                Expression.Call(Expression.Convert(instanceParameter, type),
-                                method,
-                                parameterTypeArray.Select(
-                                    t => Expression.Convert(Expression.Call(serviceMapParameter,
-                                                                            typeof(ServiceMap).GetMethod("GetService"),
-                                                                            Expression.Constant(t)), t)).ToArray()),
-                instanceParameter,
-                serviceMapParameter);
-
-            var invokeFunc = invokeExpression.Compile();
-
-            return new OnInfuseFunc((instance, serviceMap, infuseType, onInfuseCompleted) =>
-            {
-                try
-                {
-                     invokeFunc(instance, serviceMap);
-                     onInfuseCompleted?.Invoke(infuseType, instance);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError($"Infuse: Exception in OnInfuseFunc: {e.Message}");
-                    Debug.LogException(e);
-                }
-            }, dependencies);
-        }
-        
-        public static OnInfuseFunc CreateAsyncOnInfuseFunc(Type type, MethodInfo method)
-        {
-            var dependencies = new HashSet<Type>();
-            var parameterTypeArray = CreateParameterTypeArray(method, dependencies);
-            var invokedMethod = method;
-
-            // As above except we're returning the Awaitable.
-            var instanceParameter = Expression.Parameter(typeof(object), "instance");
-            var serviceMapParameter = Expression.Parameter(typeof(ServiceMap), "serviceMap");
-            var invokeExpression = Expression.Lambda<Func<object, ServiceMap, Awaitable>>(
-                Expression.Call(Expression.Convert(instanceParameter, type),
-                                method,
-                                parameterTypeArray.Select(
-                                    t => Expression.Convert(Expression.Call(serviceMapParameter,
-                                                                            typeof(ServiceMap).GetMethod("GetService"),
-                                                                            Expression.Constant(t)), t)).ToArray()),
-                instanceParameter,
-                serviceMapParameter);
-
-            var invokeFunc = invokeExpression.Compile();
-
-            return new OnInfuseFunc(async (instance, serviceMap, infuseType, onInfuseCompleted) =>
-            {
-                try
-                {
-                    await invokeFunc.Invoke(instance, serviceMap);
-                    onInfuseCompleted?.Invoke(infuseType, instance);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError($"Infuse: Exception in OnInfuseFunc: {e.Message}");
-                    Debug.LogException(e);
-                }
-            }, dependencies);
-        }
-
-        private static OnDefuseFunc CreateOnDefuseFunc(Type type, MethodInfo method)
-        {
-            if (method == null)
-            {
-                return OnDefuseFunc.Null;
-            }
-
-            // Building a lambda expression here should be a little bit faster
-            // and also seems to save us an unnecessary heap allocation.
-            var instanceParameter = Expression.Parameter(typeof(object), "instance");
-            var invokeExpression = Expression.Lambda<Action<object>>(
-                Expression.Call(Expression.Convert(instanceParameter, type), method),
-                instanceParameter);
-
-            var invokeFunc = invokeExpression.Compile();
-            
-            return new OnDefuseFunc((instance) =>
-            {
-                try
-                {
-                    invokeFunc(instance);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError($"Infuse: Exception in OnDefuseFunc: {e.Message}");
-                    Debug.LogException(e);
-                }
-            });                
-        }
-        
-        private static bool ValidateOnInfuseMethod(MethodInfo method)
-        {
-            if (method.IsAbstract)
-            {
-                return false;
-            }
-
-            if (method.IsGenericMethod)
-            {
-                Debug.LogError($"Infuse: OnInfuse method cannot be generic: {method}");
-                return false;
-            }
-
-            if (method.ReturnType != typeof(void) &&
-                method.ReturnType != typeof(Awaitable))
-            {
-                Debug.LogError($"Infuse: OnInfuse method must return void or Awaitable: {method}");
-                return false;
-            }
-
-            return true;
-        }
-
-        private static bool ValidateOnDefuseMethod(MethodInfo method)
-        {
-            if (method.IsAbstract)
-            {
-                return false;
-            }
-
-            if (method.IsGenericMethod)
-            {
-                Debug.LogError($"Infuse: OnDefuse method cannot be generic: {method}");
-                return false;
-            }
-            
-            if (method.ReturnType != typeof(void))
-            {
-                Debug.LogError($"Infuse: OnDefuse method must return void: {method}");
-                return false;
-            }
-
-            if (method.GetParameters().Length != 0)
-            {
-                Debug.LogError($"Infuse: OnDefuse method cannot have parameters: {method}");
-                return false;
-            }
-
-            return true;
-        }
-
-        public static Type [] CreateParameterTypeArray(MethodInfo method, HashSet<Type> dependencies)
-        {
-            var parameters = method.GetParameters();
-            var parameterTypeArray = new Type[parameters.Length];
-
-            for (int i = 0; i < parameters.Length; i++)
-            {
-                var parameter = parameters[i];
-                
-                if (parameter.IsIn)
-                {
-                    throw new InfuseException($"In parameters are not supported: {parameter.Name}");
-                }
-                
-                if (parameter.IsOut)
-                {
-                    throw new InfuseException($"Out parameters are not supported: {parameter.Name}");
-                }
-
-                var parameterType = parameter.ParameterType;
-
-                dependencies.Add(parameterType);
-                
-                parameterTypeArray[i] = parameterType;
-            }
-
-            return parameterTypeArray;
         }
     }
 }
