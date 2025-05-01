@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using Infuse;
 
@@ -13,10 +14,16 @@ namespace Infuse.Examples
         
         private Vector3 _velocity;
         private float _lifeTime;
+
+        private Action _updateAction;
         
         public void Initialize(InfuseContext context)
         {
             _context = context;
+
+            // Storing a reference to a member function as an Action saves
+            // several unnecessary allocations later.
+            _updateAction = UpdateEvent;
         }
 
         private void OnInfuse(ISimplePool parentPool,
@@ -28,7 +35,7 @@ namespace Infuse.Examples
             _updateEvent = updateEvent;
 
             _bubbleCounter.AddBubble();
-            _updateEvent.Add(this, UpdateEvent);
+            _updateEvent.Add(this, _updateAction);
         }
         
         private void OnDefuse()
@@ -43,8 +50,8 @@ namespace Infuse.Examples
         private void OnEnable()
         {
             transform.localPosition = Vector3.zero;
-            _velocity = new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f), 0);
-            _lifeTime = Time.time + Random.Range(2f, 3f);
+            _velocity = new Vector3(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-1f, 1f), 0);
+            _lifeTime = Time.time + UnityEngine.Random.Range(2f, 3f);
 
             _context.Register(this, false);
         }
