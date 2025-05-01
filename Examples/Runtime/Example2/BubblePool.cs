@@ -3,10 +3,9 @@ using Infuse;
 
 namespace Infuse.Examples
 {
-    // This class is infused as an InfuseServiceStack. This means that we can
-    // have multiple instances of the same service, with one overriding the
-    // other.
-    public class BubblePool : SimplePool, InfuseAs<InfuseServiceStack<ISimplePool>>
+    // This class is infused as a ServiceStack. This means that we can have
+    // multiple instances of the same service, with one overriding the other.
+    public class BubblePool : SimplePool, InfuseAs<ServiceStack<ISimplePool>>
     {
         private void OnEnable()
         {

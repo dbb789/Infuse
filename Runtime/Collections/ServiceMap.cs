@@ -141,7 +141,7 @@ namespace Infuse.Collections
             return false;
         }
         
-        public bool ContainsAll(List<Type> serviceList)
+        public bool ContainsAll(HashSet<Type> serviceList)
         {
             foreach (var service in serviceList)
             {

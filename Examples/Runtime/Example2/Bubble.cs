@@ -3,9 +3,9 @@ using Infuse;
 
 namespace Infuse.Examples
 {
-    // Each Bubble will be added to a common InfuseServiceCollection<Bubble> as
-    // a result of calling Infuse() and Defuse() below.
-    public class Bubble : MonoBehaviour, InfuseAs<InfuseServiceCollection<Bubble>>
+    // Each Bubble will be added to a common ServiceCollection<Bubble> as a
+    // result of calling Infuse() and Defuse() below.
+    public class Bubble : MonoBehaviour, InfuseAs<ServiceCollection<Bubble>>
     {
         private SimplePool _parentPool;
         private Vector3 _velocity;

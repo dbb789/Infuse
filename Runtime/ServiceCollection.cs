@@ -5,7 +5,7 @@ using Infuse.Collections;
 
 namespace Infuse
 {
-    public class InfuseServiceCollection<TServiceType> : ServiceContainer<TServiceType>
+    public class ServiceCollection<TServiceType> : ServiceContainer<TServiceType>
         where TServiceType : class
     {
         public override bool Populated => _services.Count > 0;
@@ -18,7 +18,7 @@ namespace Infuse
         public event Action<TServiceType> OnServiceAdded;
         public event Action<TServiceType> OnServiceRemoved;
 
-        public InfuseServiceCollection()
+        public ServiceCollection()
         {
             _services = new HashSet<TServiceType>();
         }

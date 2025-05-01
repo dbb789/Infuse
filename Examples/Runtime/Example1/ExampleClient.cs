@@ -3,7 +3,7 @@ using Infuse;
 
 namespace Infuse.Examples
 {
-    public class ExampleClient : MonoBehaviour, InfuseAs<InfuseServiceCollection<ExampleClient>>
+    public class ExampleClient : MonoBehaviour, InfuseAs<ServiceCollection<ExampleClient>>
     {
         private ExampleServiceC _exampleServiceC;
         

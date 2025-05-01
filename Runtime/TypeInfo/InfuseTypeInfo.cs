@@ -11,13 +11,13 @@ namespace Infuse.TypeInfo
         public Type InstanceType => _instanceType;
         public bool Empty => _empty;
         
-        public List<Type> ProvidedServices => _providedServices;
-        public List<Type> RequiredServices => _requiredServices;
+        public HashSet<Type> ProvidedServices => _providedServices;
+        public HashSet<Type> RequiredServices => _requiredServices;
 
         private readonly Type _instanceType;
         
-        private readonly List<Type> _providedServices;
-        private readonly List<Type> _requiredServices;
+        private readonly HashSet<Type> _providedServices;
+        private readonly HashSet<Type> _requiredServices;
 
         private readonly OnInfuseFunc _infuseFunc;
         private readonly OnDefuseFunc _defuseFunc;
@@ -34,8 +34,8 @@ namespace Infuse.TypeInfo
             _infuseFunc = infuseFunc ?? throw new ArgumentNullException(nameof(infuseFunc));
             _defuseFunc = defuseFunc ?? throw new ArgumentNullException(nameof(defuseFunc));
             
-            _providedServices = new List<Type>(providedServices ?? Enumerable.Empty<Type>());
-            _requiredServices = new List<Type>(infuseFunc.Dependencies);
+            _providedServices = new HashSet<Type>(providedServices ?? Enumerable.Empty<Type>());
+            _requiredServices = new HashSet<Type>(infuseFunc.Dependencies);
 
             // If we don't provide any services and we don't have an
             // OnInfuseFunc or OnDefuseFunc, then this type does not directly

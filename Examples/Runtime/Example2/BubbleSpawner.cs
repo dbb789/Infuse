@@ -5,7 +5,8 @@ namespace Infuse.Examples
 {
     public class BubbleSpawner : MonoBehaviour
     {
-        private InfuseServiceStack<ISimplePool> _bubblePool;
+        private ServiceStack<ISimplePool> _bubblePool;
+        private IUpdateEvent _updateEvent;
         private float _nextSpawnTime;
         
         private void Awake()
@@ -13,34 +14,28 @@ namespace Infuse.Examples
             InfuseGlobalContext.Register(this);
         }
 
-        // Ensures that Update() will never be called when BubblePool isn't
-        // available.
-        private void OnEnable()
-        {
-            if (_bubblePool == null)
-            {
-                enabled = false;
-            }
-        }
-
-        public void OnInfuse(InfuseServiceStack<ISimplePool> bubblePool)
+        public void OnInfuse(ServiceStack<ISimplePool> bubblePool, IUpdateEvent updateEvent)
         {
             Debug.Log("BubbleSpawner.OnInfuse()", gameObject);
             
             _bubblePool = bubblePool;
+            _updateEvent = updateEvent;
             _nextSpawnTime = Time.time;
-            enabled = true;
+
+            _updateEvent.Add(this, UpdateEvent);
         }
 
         private void OnDefuse()
         {
             Debug.Log("BubbleSpawner.OnDefuse()", gameObject);
+
+            _updateEvent.Remove(this);
             
             _bubblePool = null;
-            enabled = false;
+            _updateEvent = null;
         }
 
-        private void Update()
+        private void UpdateEvent()
         {
             if (Time.time < _nextSpawnTime)
             {

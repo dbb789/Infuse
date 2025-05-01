@@ -33,6 +33,7 @@ namespace Infuse
             _serviceMap.OnServiceTypeRegistered += ServiceTypeStateUpdated;
             _serviceMap.OnServiceTypeUnregistered += ServiceTypeStateUpdated;
             _serviceMap.Register(typeof(InfuseContext), this);
+            _serviceMap.Register(typeof(InfuseTypeInfoCache), _typeInfoCache);
         }
 
         public void Dispose()
@@ -58,6 +59,8 @@ namespace Infuse
             _instanceMap.Dispose();
 
             _serviceMap.Unregister(typeof(InfuseContext), this);
+            _serviceMap.Unregister(typeof(InfuseTypeInfoCache), _typeInfoCache);
+
             _serviceMap.OnServiceTypeRegistered -= ServiceTypeStateUpdated;
             _serviceMap.OnServiceTypeUnregistered -= ServiceTypeStateUpdated;
             _serviceMap.Dispose();

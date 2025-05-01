@@ -9,14 +9,14 @@ namespace Infuse.Examples
         [SerializeField]
         private TMP_Text _bubbleCounterLabel;
         
-        private InfuseServiceCollection<Bubble> _bubbleCollection;
+        private ServiceCollection<Bubble> _bubbleCollection;
         
         private void Awake()
         {
             InfuseGlobalContext.Register(this);
         }
 
-        public void OnInfuse(InfuseServiceCollection<Bubble> bubbleCollection)
+        public void OnInfuse(ServiceCollection<Bubble> bubbleCollection)
         {
             Debug.Log("BubbleCounter.OnInfuse()", gameObject);
 

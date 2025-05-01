@@ -12,7 +12,7 @@ namespace Infuse.Examples
         [SerializeField]
         private Transform _cameraSelectorContainer;
 
-        private InfuseServiceCollection<Camera> _cameraCollection;
+        private ServiceCollection<Camera> _cameraCollection;
         private Dictionary<Camera, CameraSelectorButton> _cameraSelectorMap = new();
         
         private void Awake()
@@ -20,7 +20,7 @@ namespace Infuse.Examples
             InfuseGlobalContext.Register(this);
         }
 
-        private void OnInfuse(InfuseServiceCollection<Camera> cameraCollection)
+        private void OnInfuse(ServiceCollection<Camera> cameraCollection)
         {
             _cameraCollection = cameraCollection;
 

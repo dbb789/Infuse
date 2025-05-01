@@ -14,7 +14,7 @@ namespace Infuse.TypeInfo
         // global instance of this class to avoid the costly overhead of
         // regenerating the same InfuseTypeInfo instances over and over again.
         public static InfuseTypeInfoCache GlobalInstance { get; private set; } = new();
-        
+
         public IEnumerable<InfuseTypeInfo> Types => _typeInfoMap?.Values ?? Enumerable.Empty<InfuseTypeInfo>();
         
         private Dictionary<Type, InfuseTypeInfo> _typeInfoMap;
@@ -26,6 +26,11 @@ namespace Infuse.TypeInfo
             _requiresServiceMap = new Dictionary<Type, List<Type>>();
         }
 
+        public InfuseTypeInfo GetTypeInfo<T>()
+        {
+            return GetTypeInfo(typeof(T));
+        }
+        
         public InfuseTypeInfo GetTypeInfo(Type instanceType)
         {
             InfuseTypeInfo typeInfo;
