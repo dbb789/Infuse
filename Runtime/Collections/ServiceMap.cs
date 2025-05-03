@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Infuse.Common;
-using Infuse.Util;
 
 namespace Infuse.Collections
 {

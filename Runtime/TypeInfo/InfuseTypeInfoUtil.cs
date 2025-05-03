@@ -7,7 +7,6 @@ using UnityEngine;
 using Infuse.Collections;
 using Infuse.Common;
 using Infuse.TypeInfo;
-using Infuse.Util;
 
 namespace Infuse.TypeInfo
 {
@@ -26,7 +25,7 @@ namespace Infuse.TypeInfo
 
             foreach (var interfaceType in interfaces)
             {
-                if (InfuseServiceUtil.TryGetServiceType(interfaceType, out var serviceType))
+                if (TryGetServiceType(interfaceType, out var serviceType))
                 {
                     if (serviceType.IsAssignableFrom(type) ||
                         typeof(ServiceContainer).IsAssignableFrom(serviceType))
@@ -119,6 +118,21 @@ namespace Infuse.TypeInfo
                     }
                 }
             }
+        }
+        
+        private static bool TryGetServiceType(Type type, out Type serviceType)
+        {
+            if (type.IsGenericType &&
+                type.GetGenericTypeDefinition() == typeof(InfuseAs<>) &&
+                type.GenericTypeArguments.Length == 1)
+            {
+                serviceType = type.GenericTypeArguments[0];
+                return true;
+            }
+
+            serviceType = default;
+            
+            return false;
         }
     }
 }

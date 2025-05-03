@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Infuse.Collections;
 using Infuse.TypeInfo;
-using Infuse.Util;
 
 namespace Infuse
 {
