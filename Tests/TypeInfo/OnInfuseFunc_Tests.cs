@@ -79,7 +79,8 @@ namespace Infuse.TypeInfo.Tests
             };
 
             var onInfuseFunc = new OnInfuseFunc(func, dependencies);
-
+            
+            Assert.IsFalse(onInfuseFunc.Empty);
             Assert.That(dependencies, Is.EquivalentTo(onInfuseFunc.Dependencies));
             
             onInfuseFunc.Invoke(instance, serviceMap, typeInfo, onInfuseCompleted);
