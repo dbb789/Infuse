@@ -75,8 +75,8 @@ namespace Infuse.Collections.Tests
 
             Assert.IsFalse(serviceMap.Contains(typeof(TestClassA)));
             Assert.Throws<InfuseException>(() => serviceMap.GetService(typeof(TestClassA)));
-            Assert.IsTrue(serviceMap.ContainsAll(new HashSet<Type>()));
-            Assert.IsFalse(serviceMap.ContainsAll(new HashSet<Type> { typeof(TestClassA) }));
+            Assert.IsTrue(serviceMap.ContainsAll(new TypeSet()));
+            Assert.IsFalse(serviceMap.ContainsAll(new TypeSet(new Type [] { typeof(TestClassA) })));
         }
 
         [Test]
@@ -89,7 +89,7 @@ namespace Infuse.Collections.Tests
             serviceMap.Register(typeof(TestClassA), instanceA);
 
             Assert.IsTrue(serviceMap.Contains(typeof(TestClassA)));
-            Assert.IsTrue(serviceMap.ContainsAll(new HashSet<Type> { typeof(TestClassA) }));
+            Assert.IsTrue(serviceMap.ContainsAll(new TypeSet(new Type [] { typeof(TestClassA) })));
             Assert.AreEqual(serviceMap.GetService(typeof(TestClassA)), instanceA);
             
             serviceMap.Register(typeof(TestClassB), instanceB);
@@ -98,7 +98,7 @@ namespace Infuse.Collections.Tests
             Assert.AreEqual(serviceMap.GetService(typeof(TestClassA)), instanceA);
             Assert.IsTrue(serviceMap.Contains(typeof(TestClassB)));
             Assert.AreEqual(serviceMap.GetService(typeof(TestClassB)), instanceB);
-            Assert.IsTrue(serviceMap.ContainsAll(new HashSet<Type> { typeof(TestClassA), typeof(TestClassB) }));
+            Assert.IsTrue(serviceMap.ContainsAll(new TypeSet(new Type [] { typeof(TestClassA), typeof(TestClassB) })));
 
             serviceMap.Unregister(typeof(TestClassA), instanceA);
 
@@ -106,7 +106,7 @@ namespace Infuse.Collections.Tests
             Assert.Throws<InfuseException>(() => serviceMap.GetService(typeof(TestClassA)));
             Assert.IsTrue(serviceMap.Contains(typeof(TestClassB)));
             Assert.AreEqual(serviceMap.GetService(typeof(TestClassB)), instanceB);
-            Assert.IsTrue(serviceMap.ContainsAll(new HashSet<Type> { typeof(TestClassB) }));
+            Assert.IsTrue(serviceMap.ContainsAll(new TypeSet(new Type [] { typeof(TestClassB) })));
         }
 
         [Test]
@@ -149,8 +149,8 @@ namespace Infuse.Collections.Tests
 
             Assert.IsTrue(serviceMap.Contains(typeof(TestServiceContainer<TestClassA>)));
             Assert.IsFalse(serviceMap.Contains(typeof(TestServiceContainer<TestClassB>)));
-            Assert.IsTrue(serviceMap.ContainsAll(new HashSet<Type> {
-                        typeof(TestServiceContainer<TestClassA>) }));
+            Assert.IsTrue(serviceMap.ContainsAll(new TypeSet(new Type [] {
+                            typeof(TestServiceContainer<TestClassA>) })));
 
             Assert.AreEqual(((TestServiceContainer<TestClassA>)
                              serviceMap.GetService(typeof(TestServiceContainer<TestClassA>))).Instance, instanceA);
@@ -160,9 +160,9 @@ namespace Infuse.Collections.Tests
 
             Assert.IsTrue(serviceMap.Contains(typeof(TestServiceContainer<TestClassA>)));
             Assert.IsTrue(serviceMap.Contains(typeof(TestServiceContainer<TestClassB>)));
-            Assert.IsTrue(serviceMap.ContainsAll(new HashSet<Type> {
+            Assert.IsTrue(serviceMap.ContainsAll(new TypeSet(new Type [] {
                         typeof(TestServiceContainer<TestClassA>),
-                        typeof(TestServiceContainer<TestClassB>) }));
+                        typeof(TestServiceContainer<TestClassB>) })));
             
             Assert.AreEqual(((TestServiceContainer<TestClassA>)
                              serviceMap.GetService(typeof(TestServiceContainer<TestClassA>))).Instance, instanceA);
@@ -173,8 +173,8 @@ namespace Infuse.Collections.Tests
 
             Assert.IsFalse(serviceMap.Contains(typeof(TestServiceContainer<TestClassA>)));
             Assert.IsTrue(serviceMap.Contains(typeof(TestServiceContainer<TestClassB>)));
-            Assert.IsTrue(serviceMap.ContainsAll(new HashSet<Type> {
-                        typeof(TestServiceContainer<TestClassB>) }));
+            Assert.IsTrue(serviceMap.ContainsAll(new TypeSet(new Type [] {
+                            typeof(TestServiceContainer<TestClassB>) })));
             
             Assert.Throws<InfuseException>(() => serviceMap.GetService(typeof(TestServiceContainer<TestClassA>)));
             Assert.AreEqual(((TestServiceContainer<TestClassB>)
@@ -184,7 +184,7 @@ namespace Infuse.Collections.Tests
             
             Assert.IsFalse(serviceMap.Contains(typeof(TestServiceContainer<TestClassA>)));
             Assert.IsFalse(serviceMap.Contains(typeof(TestServiceContainer<TestClassB>)));
-            Assert.IsTrue(serviceMap.ContainsAll(new HashSet<Type>()));
+            Assert.IsTrue(serviceMap.ContainsAll(new TypeSet()));
 
             Assert.Throws<InfuseException>(() => serviceMap.GetService(typeof(TestServiceContainer<TestClassA>)));
             Assert.Throws<InfuseException>(() => serviceMap.GetService(typeof(TestServiceContainer<TestClassB>)));
